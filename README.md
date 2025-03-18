@@ -1,2 +1,16 @@
 # meal_meters
-MealMeter is your go-to budget-friendly app for finding delicious meals that fit your wallet. Whether you're a student, a busy professional, or just looking to save, MealMeter helps you discover affordable dining options, plan meals, and track your food spending—all in one place. Eat well without breaking the bank!
+
+A new Flutter project.
+
+## Getting Started
+
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
