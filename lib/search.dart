@@ -37,6 +37,7 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xFFF5E1BE),
         elevation: 0,
+        automaticallyImplyLeading: false, // Remove back button
         title: Row(
           children: [
             CircleAvatar(
