@@ -6,6 +6,8 @@ class ContactUsScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
 
+  ContactUsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,12 +101,97 @@ class ContactUsScreen extends StatelessWidget {
                 Icon(Icons.cancel, color: Colors.brown[700]),
                 Icon(Icons.tiktok, color: Colors.brown[700]),
                 Icon(Icons.camera_alt, color: Colors.brown[700]),
-
               ],
             ),
             SizedBox(height: 20),
           ],
         ),
+      ),
+
+      // Bottom Navigation Bar
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Color(0xFFF5E1BE), // Beige background
+        selectedItemColor: Colors.brown[700], // Darker icon color when selected
+        unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        currentIndex: 3, // Contact is selected by default
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/restaurant');
+              break;
+            case 3:
+            // Already on ContactUsScreen, no need to navigate
+              break;
+            case 4:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Search",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Menu",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Call",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Profile",
+          ),
+        ],
       ),
     );
   }

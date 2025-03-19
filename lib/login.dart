@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,10 +51,6 @@ class LoginPage extends StatelessWidget {
               _buildTextField("Email"),
               SizedBox(height: 15),
 
-              // Phone Number Input Field
-              _buildTextField("Phone Number"),
-              SizedBox(height: 15),
-
               // Password Input Field
               _buildTextField("Password", obscureText: true),
               SizedBox(height: 20),
@@ -60,13 +58,15 @@ class LoginPage extends StatelessWidget {
               // Sign Up Text
               GestureDetector(
                 onTap: () {
-                  // Navigate to Sign Up page (replace with actual route)
+                  // Navigate to the SignUpScreen
+                  Navigator.pushNamed(context, '/signup');
                 },
                 child: Text(
-                  "Don’t have an account? Sign In",
+                  "Don’t have an account? Sign Up",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.brown[700],
+                    decoration: TextDecoration.underline,
                   ),
                 ),
               ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RestaurantScreen extends StatelessWidget {
+  const RestaurantScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,17 +126,87 @@ class RestaurantScreen extends StatelessWidget {
 
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.brown[700],
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
+        backgroundColor: Color(0xFFF5E1BE), // Beige background
+        selectedItemColor: Colors.brown[700], // Darker icon color when selected
+        unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
+        currentIndex: 2, // Restaurant is selected by default
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+            // Already on RestaurantScreen, no need to navigate
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/contact');
+              break;
+            case 4:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu, size: 30), label: "Menu"),
-          BottomNavigationBarItem(icon: Icon(Icons.phone), label: "Call"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Search",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Menu",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Call",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Profile",
+          ),
         ],
       ),
     );
@@ -147,7 +219,7 @@ class ReviewCard extends StatelessWidget {
   final String rating;
   final String review;
 
-  ReviewCard({required this.name, required this.rating, required this.review});
+  const ReviewCard({super.key, required this.name, required this.rating, required this.review});
 
   @override
   Widget build(BuildContext context) {

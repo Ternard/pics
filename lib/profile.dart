@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,17 +88,87 @@ class ProfileScreen extends StatelessWidget {
 
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.brown[700],
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
+        backgroundColor: Color(0xFFF5E1BE), // Beige background
+        selectedItemColor: Colors.brown[700], // Darker icon color when selected
+        unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
+        currentIndex: 4, // Profile is selected by default
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/restaurant');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/contact');
+              break;
+            case 4:
+            // Already on ProfileScreen, no need to navigate
+              break;
+          }
+        },
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.restaurant_menu, size: 30), label: "Menu"),
-          BottomNavigationBarItem(icon: Icon(Icons.phone), label: "Call"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Search",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Menu",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Call",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.brown[100], // Lighter circle around the icon
+              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
+            ),
+            label: "Profile",
+          ),
         ],
       ),
     );
@@ -107,7 +179,7 @@ class ProfileScreen extends StatelessWidget {
 class ProfileField extends StatelessWidget {
   final String text;
 
-  ProfileField({required this.text});
+  const ProfileField({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {

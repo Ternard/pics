@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
@@ -9,7 +11,6 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   @override
@@ -63,8 +64,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 children: [
                   buildTextField("Email", emailController, false),
                   SizedBox(height: 10),
-                  buildTextField("Phone Number", phoneController, false),
-                  SizedBox(height: 10),
                   buildTextField("Password", passwordController, true),
                   SizedBox(height: 20),
 
@@ -74,7 +73,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          // Handle Sign Up logic
+                          // Navigate to the HomeScreen
+                          Navigator.pushNamed(context, '/home');
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -95,7 +95,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   // Navigate to Log In
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      // Navigate to the LoginPage
+                      Navigator.pushNamed(context, '/login');
                     },
                     child: Text(
                       "Already have an account? Log In",
