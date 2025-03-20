@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
-
-  @override
-  _ProfileScreenState createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  int _currentIndex = 4; // Track the current index
 
   @override
   Widget build(BuildContext context) {
@@ -101,11 +94,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: _currentIndex, // Track the current index
+        currentIndex: 4, // Profile is selected by default
         onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Update the current index
-          });
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
@@ -130,12 +120,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.home,
-                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
             ),
             label: "Home",
           ),
@@ -144,12 +131,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.search,
-                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
             ),
             label: "Search",
           ),
@@ -158,12 +142,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
             ),
             label: "Menu",
           ),
@@ -172,12 +153,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.phone,
-                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
             ),
             label: "Call",
           ),
@@ -186,12 +164,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.person,
-                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
             ),
             label: "Profile",
           ),

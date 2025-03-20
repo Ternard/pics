@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class RestaurantScreen extends StatefulWidget {
+class RestaurantScreen extends StatelessWidget {
   const RestaurantScreen({super.key});
-
-  @override
-  _RestaurantScreenState createState() => _RestaurantScreenState();
-}
-
-class _RestaurantScreenState extends State<RestaurantScreen> {
-  int _currentIndex = 2; // Track the current index
 
   @override
   Widget build(BuildContext context) {
@@ -139,11 +132,8 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: _currentIndex, // Track the current index
+        currentIndex: 2, // Restaurant is selected by default
         onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Update the current index
-          });
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
@@ -168,12 +158,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.home,
-                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
             ),
             label: "Home",
           ),
@@ -182,12 +169,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.search,
-                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
             ),
             label: "Search",
           ),
@@ -196,12 +180,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
             ),
             label: "Menu",
           ),
@@ -210,12 +191,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.phone,
-                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
             ),
             label: "Call",
           ),
@@ -224,12 +202,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.person,
-                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
             ),
             label: "Profile",
           ),

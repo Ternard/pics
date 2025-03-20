@@ -1,15 +1,6 @@
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Track the current index
-
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +8,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // Remove back button
         title: Row(
           children: [
             CircleAvatar(
@@ -36,90 +26,67 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: SingleChildScrollView( // Enable scrolling
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Find the perfect meal within your Budget',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.brown,
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Find the perfect meal within your Budget',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.brown,
+              ),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Search Meals',
+                filled: true,
+                fillColor: Colors.brown[300], // Darker search bar background
+                prefixIcon: Icon(Icons.search, color: Colors.brown[700]), // Darker search icon
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
                 ),
               ),
-              SizedBox(height: 10),
-
-              // Search Button
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/search'); // Navigate to SearchScreen
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.brown[300], // Darker search bar background
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: Colors.brown[700]), // Darker search icon
-                      SizedBox(width: 8),
-                      Text(
-                        'Search Meals',
-                        style: TextStyle(color: Colors.brown[700]),
-                      ),
-                    ],
-                  ),
-                ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Restaurants near you...',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                children: [
+                  buildRestaurantCard('CJ’s', 'Kenyan', '4.5(100+ Reviews)', '2km Away', 'assets/cjs.jpg'),
+                  buildRestaurantCard('Shawarma Street', 'Kenyan', '3.9(600+ Reviews)', '2km Away', 'assets/shawarma.jpg'),
+                ],
               ),
-              SizedBox(height: 20),
-
-              // Restaurants Near You Section
-              Text(
-                'Restaurants near you...',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Your History...',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                children: [
+                  buildRestaurantCard('Chicken Wings', 'Kenyan', '4.5(100+ Reviews)', '', 'assets/chicken_wings.jpg'),
+                  buildRestaurantCard('Shawarma', 'Indian', '3.9(600+ Reviews)', '', 'assets/shawarma_food.jpg'),
+                ],
               ),
-              SizedBox(height: 10),
-              SizedBox(
-                height: 200, // Set a fixed height for the scrollable section
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    buildRestaurantCard('CJ’s', 'Kenyan', '4.5(100+ Reviews)', '2km Away', 'assets/cjs.jpg'),
-                    buildRestaurantCard('Shawarma Street', 'Kenyan', '3.9(600+ Reviews)', '2km Away', 'assets/shawarma.jpg'),
-                    buildRestaurantCard('Burger King', 'Fast Food', '4.2(500+ Reviews)', '3km Away', 'assets/burger_king.jpg'),
-                    buildRestaurantCard('Pizza Hut', 'Italian', '4.0(400+ Reviews)', '5km Away', 'assets/pizza_hut.jpg'),
-                    buildRestaurantCard('KFC', 'Fast Food', '4.1(300+ Reviews)', '4km Away', 'assets/kfc.jpg'),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // Your History Section
-              Text(
-                'Your History...',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              SizedBox(
-                height: 200, // Set a fixed height for the scrollable section
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    buildRestaurantCard('Chicken Wings', 'Kenyan', '4.5(100+ Reviews)', '', 'assets/chicken_wings.jpg'),
-                    buildRestaurantCard('Shawarma', 'Indian', '3.9(600+ Reviews)', '', 'assets/shawarma_food.jpg'),
-                    buildRestaurantCard('Pizza', 'Italian', '4.2(200+ Reviews)', '', 'assets/pizza.jpg'),
-                    buildRestaurantCard('Burger', 'Fast Food', '4.0(150+ Reviews)', '', 'assets/burger.jpg'),
-                    buildRestaurantCard('Sushi', 'Japanese', '4.3(250+ Reviews)', '', 'assets/sushi.jpg'),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20), // Add extra space at the bottom for scrolling
-            ],
-          ),
+            ),
+          ],
         ),
       ),
 
@@ -130,14 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: _currentIndex, // Track the current index
+        currentIndex: 0, // Home is selected by default
         onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Update the current index
-          });
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/home');
+            // Already on HomeScreen, no need to navigate
               break;
             case 1:
               Navigator.pushNamed(context, '/search');
@@ -159,12 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.home,
-                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
             ),
             label: "Home",
           ),
@@ -173,12 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.search,
-                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
             ),
             label: "Search",
           ),
@@ -187,12 +145,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
             ),
             label: "Menu",
           ),
@@ -201,12 +156,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.phone,
-                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
             ),
             label: "Call",
           ),
@@ -215,12 +167,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.person,
-                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
             ),
             label: "Profile",
           ),

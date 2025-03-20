@@ -9,7 +9,6 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  int _currentIndex = 1; // Track the current index
   List<String> categories = ["All", "Fast Food", "Drinks", "Desserts", "Meat"];
   int selectedCategoryIndex = 0;
 
@@ -85,7 +84,8 @@ class _SearchScreenState extends State<SearchScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle search logic
+                  // Navigate to the MealScreen when the search button is clicked
+                  Navigator.pushNamed(context, '/meals');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.brown[700],
@@ -160,11 +160,8 @@ class _SearchScreenState extends State<SearchScreen> {
         unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: _currentIndex, // Track the current index
+        currentIndex: 1, // Search is selected by default
         onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Update the current index
-          });
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
@@ -189,12 +186,9 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.home,
-                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
             ),
             label: "Home",
           ),
@@ -203,12 +197,9 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.search,
-                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
             ),
             label: "Search",
           ),
@@ -217,12 +208,9 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
             ),
             label: "Menu",
           ),
@@ -231,12 +219,9 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.phone,
-                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
             ),
             label: "Call",
           ),
@@ -245,12 +230,9 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.person,
-                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
             ),
             label: "Profile",
           ),

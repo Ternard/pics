@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ContactUsScreen extends StatefulWidget {
-  const ContactUsScreen({super.key});
-
-  @override
-  _ContactUsScreenState createState() => _ContactUsScreenState();
-}
-
-class _ContactUsScreenState extends State<ContactUsScreen> {
-  int _currentIndex = 3; // Track the current index
+class ContactUsScreen extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
+
+  ContactUsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -121,11 +115,8 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
         unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: _currentIndex, // Track the current index
+        currentIndex: 3, // Contact is selected by default
         onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Update the current index
-          });
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
@@ -150,12 +141,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.home,
-                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
             ),
             label: "Home",
           ),
@@ -164,12 +152,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.search,
-                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
             ),
             label: "Search",
           ),
@@ -178,12 +163,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
             ),
             label: "Menu",
           ),
@@ -192,12 +174,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.phone,
-                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
             ),
             label: "Call",
           ),
@@ -206,12 +185,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
+                color: Colors.brown[100], // Lighter circle around the icon
               ),
-              child: Icon(
-                Icons.person,
-                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
+              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
             ),
             label: "Profile",
           ),

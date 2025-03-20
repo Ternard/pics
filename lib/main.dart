@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'contact_us.dart'; // Import the ContactUsScreen
 import 'home.dart'; // Import the HomeScreen
 import 'login.dart'; // Import the LoginPage
+import 'meals.dart'; // Import the MealScreen
 import 'profile.dart'; // Import the ProfileScreen
 import 'restaurants.dart'; // Import the RestaurantScreen
 import 'search.dart'; // Import the SearchScreen
@@ -22,6 +23,7 @@ class MealMeterApp extends StatelessWidget {
       initialRoute: '/', // Set the initial route to the splash screen
       routes: {
         '/': (context) => SplashScreen(), // SplashScreen
+        '/meals': (context) => MealScreen(), // MealScreen
         '/signup': (context) => SignUpScreen(), // SignUpScreen
         '/login': (context) => LoginPage(), // LoginPage
         '/home': (context) => HomeScreen(), // HomeScreen
