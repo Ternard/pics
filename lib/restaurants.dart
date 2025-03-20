@@ -18,13 +18,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // Header
               Container(
-                padding: EdgeInsets.all(16.0),
-                color: Color(0xFFF5DEB3), // Beige color
+                padding: const EdgeInsets.all(16.0),
+                color: const Color(0xFFF5DEB3), // Beige color
                 child: Row(
                   children: [
                     Icon(Icons.restaurant, color: Colors.brown),
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
                     Text(
                       'MealMeter',
                       style: TextStyle(
@@ -37,7 +38,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 ),
               ),
               ClipRRect(
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
                 child: Image.network(
                   'https://source.unsplash.com/400x300/?restaurant',
                   width: double.infinity,
@@ -45,7 +46,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
                 'Shawarma Street',
                 style: TextStyle(
@@ -54,81 +55,144 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   color: Colors.brown,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.location_on, color: Colors.brown),
-                  SizedBox(width: 5),
+                  const SizedBox(width: 5),
                   Text(
                     'Restaurant Location',
                     style: TextStyle(color: Colors.brown),
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.brown,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 ),
                 onPressed: () {},
-                child: Text('Menu', style: TextStyle(color: Colors.white)),
+                child: const Text('Menu', style: TextStyle(color: Colors.white)),
               ),
-              SizedBox(height: 20),
-              _buildReviewCard('Brandon White', 4.2, 'Best Customer Services I’ve ever had...'),
-              _buildReviewCard('Victoria Malen', 4.5, 'The meals are so aesthetic...Just Wow!'),
+              const SizedBox(height: 20),
+
+              // Reviews Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Customer Reviews',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 180, // Fixed height for the reviews section
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildReviewCard('Brandon White', '4.2', 'Best Customer Services I’ve ever had...'),
+                            const SizedBox(width: 10),
+                            _buildReviewCard('Victoria Malen', '4.5', 'The meals are so aesthetic...Just Wow!'),
+                            const SizedBox(width: 10),
+                            _buildReviewCard('John Doe', '4.8', 'Amazing food and great service!'),
+                            const SizedBox(width: 10),
+                            _buildReviewCard('Jane Smith', '4.5', 'Highly recommend this place!'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
-    );
-  }
 
-  Widget _buildReviewCard(String name, double rating, String review) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Color(0xFFF5DEB3),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      // Add New Restaurant and Add New Review Buttons
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.brown)),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.amber, size: 18),
-                    Text(rating.toString(), style: TextStyle(color: Colors.brown)),
-                  ],
-                ),
-              ],
+            FloatingActionButton(
+              onPressed: () {
+                // Handle "Add New Restaurant" button press
+              },
+              backgroundColor: Colors.brown,
+              child: const Icon(Icons.add, color: Colors.white),
             ),
-            SizedBox(height: 5),
-            Text(review, style: TextStyle(color: Colors.brown)),
+            FloatingActionButton(
+              onPressed: () {
+                // Handle "Add New Review" button press
+              },
+              backgroundColor: Colors.brown,
+              child: const Icon(Icons.edit, color: Colors.white),
+            ),
           ],
         ),
       ),
     );
   }
 
+  // Review Card Widget
+  Widget _buildReviewCard(String name, String rating, String review) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      width: 160, // Fixed width for each review card
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5DEB3), // Beige color
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Name
+          Text(
+            name,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 5),
+
+          // Star Rating (if rating is not empty)
+          if (rating.isNotEmpty)
+            Row(
+              children: [
+                Icon(Icons.star, color: Colors.orange, size: 18),
+                const SizedBox(width: 5),
+                Text(rating, style: TextStyle(fontSize: 16)),
+              ],
+            ),
+          const SizedBox(height: 5),
+
+          // Review Text
+          Text(
+            review,
+            maxLines: 3, // Limit to 3 lines
+            overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
+            style: TextStyle(color: Colors.black54, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Bottom Navigation Bar
   Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE), // Beige background
       selectedItemColor: Colors.brown[700], // Darker icon color when selected
       unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
       showSelectedLabels: false,
       showUnselectedLabels: false,
       currentIndex: currentIndex,
       onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
@@ -157,10 +221,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
+  // Bottom Navigation Bar Item
   BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
     return BottomNavigationBarItem(
       icon: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected

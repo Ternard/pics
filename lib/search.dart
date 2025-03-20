@@ -9,6 +9,25 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   int _currentIndex = 1; // Track the current index
+  String? _selectedPeopleRange; // For No. of People dropdown
+  String? _selectedFoodType; // For Food Type dropdown
+
+  // Dropdown options for No. of People
+  final List<String> _peopleRanges = [
+    'Below 5',
+    '6-10',
+    '11-15',
+    '16-20',
+    'Above 20',
+  ];
+
+  // Dropdown options for Food Type
+  final List<String> _foodTypes = [
+    'Drinks',
+    'Meals',
+    'Snacks',
+    'Combined Meals',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +39,12 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               // Header
               Container(
-                padding: EdgeInsets.all(16.0),
-                color: Color(0xFFF5DEB3), // Beige color
+                padding: const EdgeInsets.all(16.0),
+                color: const Color(0xFFF5DEB3), // Beige color
                 child: Row(
                   children: [
                     Icon(Icons.restaurant_menu, color: Colors.brown),
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
                     Text(
                       'MealMeter',
                       style: TextStyle(
@@ -37,31 +56,47 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
-              // Search Buttons
-              _buildButton(Icons.location_on, 'Location'),
-              _buildButton(Icons.attach_money, 'Budget (Ksh)'),
-              _buildButton(Icons.people, 'No. of People', isDropdown: true),
-              _buildButton(Icons.event, 'Event type', isDropdown: true),
+              // Location Input Field
+              _buildInputField(Icons.location_on, 'Location', isDropdown: false),
+              const SizedBox(height: 10),
 
-              SizedBox(height: 20),
+              // Budget Input Field
+              _buildInputField(Icons.attach_money, 'Budget (Ksh)', isDropdown: false),
+              const SizedBox(height: 10),
+
+              // No. of People Dropdown
+              _buildInputField(Icons.people, 'No. of People', isDropdown: true, dropdownItems: _peopleRanges, selectedValue: _selectedPeopleRange, onChanged: (value) {
+                setState(() {
+                  _selectedPeopleRange = value; // Update selected value
+                });
+              }),
+              const SizedBox(height: 10),
+
+              // Food Type Dropdown
+              _buildInputField(Icons.fastfood, 'Food Type', isDropdown: true, dropdownItems: _foodTypes, selectedValue: _selectedFoodType, onChanged: (value) {
+                setState(() {
+                  _selectedFoodType = value; // Update selected value
+                });
+              }),
+              const SizedBox(height: 20),
 
               // Search Meals Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.brown,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/meals');
+                  // Handle search logic
                 },
-                child: Text('Search Meals', style: TextStyle(color: Colors.white)),
+                child: const Text('Search Meals', style: TextStyle(color: Colors.white)),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -69,38 +104,60 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildButton(IconData icon, String text, {bool isDropdown = false}) {
+  // Custom Input Field Widget
+  Widget _buildInputField(
+      IconData icon,
+      String hintText, {
+        bool isDropdown = false,
+        List<String>? dropdownItems,
+        String? selectedValue,
+        Function(String?)? onChanged,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFF5DEB3), // Beige color
-          padding: EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5DEB3), // Beige color
+          borderRadius: BorderRadius.circular(8),
         ),
-        onPressed: () {},
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.brown),
-                SizedBox(width: 10),
-                Text(text, style: TextStyle(color: Colors.brown)),
-              ],
+            Icon(icon, color: Colors.brown),
+            const SizedBox(width: 10),
+            Expanded(
+              child: isDropdown
+                  ? DropdownButton<String>(
+                value: selectedValue,
+                hint: Text(hintText, style: TextStyle(color: Colors.brown)),
+                items: dropdownItems?.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.brown)),
+                  );
+                }).toList(),
+                onChanged: onChanged,
+                underline: const SizedBox(), // Remove the default underline
+                isExpanded: true, // Allow the dropdown to expand
+              )
+                  : TextField(
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.brown),
+                ),
+              ),
             ),
-            if (isDropdown) Icon(Icons.arrow_drop_down, color: Colors.brown),
           ],
         ),
       ),
     );
   }
 
+  // Bottom Navigation Bar
   Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE), // Beige background
       selectedItemColor: Colors.brown[700], // Darker icon color when selected
       unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
       showSelectedLabels: false,
@@ -108,7 +165,7 @@ class _SearchScreenState extends State<SearchScreen> {
       currentIndex: currentIndex,
       onTap: (index) {
         setState(() {
-          _currentIndex = index;
+          _currentIndex = index; // Update the current index
         });
         switch (index) {
           case 0:
@@ -138,10 +195,11 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  // Bottom Navigation Bar Item
   BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
     return BottomNavigationBarItem(
       icon: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected

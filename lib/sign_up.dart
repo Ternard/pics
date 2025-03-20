@@ -16,14 +16,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5E1BE),
+      backgroundColor: const Color(0xFFF5E1BE),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 100),
+              const SizedBox(height: 100),
 
               // Logo and App Name
               Row(
@@ -34,7 +34,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     radius: 18,
                     child: Icon(Icons.restaurant_menu, color: Colors.brown),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
                     "MealMeter",
                     style: GoogleFonts.playfairDisplay(
@@ -45,7 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
 
               // Sign Up Title
               Text(
@@ -56,7 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   color: Colors.brown[700],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Sign Up Form
               Form(
@@ -64,9 +64,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Column(
                   children: [
                     buildTextField("Email", emailController, false),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     buildTextField("Password", passwordController, true),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // Sign Up Button
                     SizedBox(
@@ -74,8 +74,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            // Navigate to the HomeScreen
-                            Navigator.pushNamed(context, '/home');
+                            // Navigate to the HomeScreen and pass the password
+                            Navigator.pushNamed(
+                              context,
+                              '/home',
+                              arguments: passwordController.text, // Pass the password
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -83,15 +87,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: Text(
+                        child: const Text(
                           "Sign Up",
                           style: TextStyle(fontSize: 18, color: Colors.white),
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
                     // Navigate to Log In
                     GestureDetector(

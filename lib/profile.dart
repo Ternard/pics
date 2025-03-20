@@ -13,6 +13,14 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   File? _image; // To store the selected image
   bool _notificationsEnabled = true; // To track notifications state
+  String? _password; // To store the password passed from sign_up.dart
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Retrieve the password passed from sign_up.dart
+    _password = ModalRoute.of(context)!.settings.arguments as String?;
+  }
 
   // Function to pick an image from the device
   Future<void> _pickImage() async {
@@ -29,9 +37,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE), // Beige background
       appBar: AppBar(
-        backgroundColor: Color(0xFFF5E1BE),
+        backgroundColor: const Color(0xFFF5E1BE),
         elevation: 0,
         automaticallyImplyLeading: false, // Remove back button
         title: Row(
@@ -41,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               radius: 18,
               child: Icon(Icons.restaurant, color: Colors.black), // Placeholder for logo
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
               "MealMeter",
               style: GoogleFonts.playfairDisplay(
@@ -57,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Profile ID Circle with Image Picker
             GestureDetector(
@@ -74,13 +82,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     : null, // Hide text if image is selected
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Profile Information Fields
             ProfileField(text: "Name"),
             ProfileField(text: "Email"),
-            ProfileField(text: "Phone Number"),
-            SizedBox(height: 20),
+            ProfileField(text: _password ?? "Your Password"), // Display the password or a placeholder
+            const SizedBox(height: 20),
 
             // Notifications Toggle
             Row(
@@ -100,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             // Logout Button
             TextButton.icon(
@@ -111,11 +119,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icon(Icons.logout, color: Colors.brown[700]),
               label: Text("Log Out", style: TextStyle(fontSize: 18, color: Colors.brown[700])),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
 
             // App Settings & Help
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -124,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -137,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Bottom Navigation Bar
   Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE), // Beige background
       selectedItemColor: Colors.brown[700], // Darker icon color when selected
       unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
       showSelectedLabels: false,
@@ -176,7 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
     return BottomNavigationBarItem(
       icon: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected
@@ -200,11 +208,11 @@ class ProfileField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 40),
-      padding: EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
+      padding: const EdgeInsets.all(15),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Color(0xFFEED9B5),
+        color: const Color(0xFFEED9B5),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Text(
