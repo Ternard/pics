@@ -13,186 +13,104 @@ class _MealScreenState extends State<MealScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFF5E1BE), // Beige background
-        selectedItemColor: Colors.brown[700], // Darker icon color when selected
-        unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        currentIndex: _currentIndex, // Track the current index
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Update the current index
-          });
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/home');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/search');
-              break;
-            case 2:
-            // Already on MealScreen, no need to navigate
-              break;
-            case 3:
-              Navigator.pushNamed(context, '/contact');
-              break;
-            case 4:
-              Navigator.pushNamed(context, '/profile');
-              break;
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
-              ),
-              child: Icon(
-                Icons.home,
-                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
-            ),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
-              ),
-              child: Icon(
-                Icons.search,
-                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
-            ),
-            label: "Search",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
-              ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
-            ),
-            label: "Menu",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
-              ),
-              child: Icon(
-                Icons.phone,
-                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
-            ),
-            label: "Call",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
-              ),
-              child: Icon(
-                Icons.person,
-                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
-              ),
-            ),
-            label: "Profile",
-          ),
-        ],
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(_currentIndex, context),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header with image
-            Stack(
-              children: [
-                ClipPath(
-                  clipper: CurvedClipper(),
-                  child: Image.asset(
-                    'assets/steak_plate.jpg', // Replace with your image asset
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Header with image
+              Stack(
+                children: [
+                  ClipPath(
+                    clipper: CurvedClipper(),
+                    child: Image.asset(
+                      'assets/steak_plate.jpg', // Replace with your image asset
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
                   ),
+                ],
+              ),
+              // Add to Plate button below the image
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: Text('Add to plate', style: TextStyle(color: Colors.white)),
                 ),
-                Positioned(
-                  bottom: 15,
-                  left: MediaQuery.of(context).size.width / 2 - 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.brown,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+              ),
+              SizedBox(height: 20),
+
+              // Meal details
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.location_on, color: Colors.brown),
+                            SizedBox(width: 5),
+                            Text('Location', style: TextStyle(color: Colors.brown)),
+                          ],
+                        ),
+                        Text('1500 Ksh', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Text('Steak Plate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    Text('Meal Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    Text(
+                      'A perfectly seared steak, cooked to your desired doneness, served with a side of creamy mashed potatoes, sautéed greens, and a rich, velvety sauce.',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
+              ),
+
+              // Customer reviews with horizontal scroll
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Customer Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10),
+                    SizedBox(
+                      height: 180, // Increased height for reviews
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildReviewCard('Brandon White', '4.2', 'Best Customer Service I’ve ever had...'),
+                            SizedBox(width: 10),
+                            _buildReviewCard('Victoria Malen', '', 'The meals are so flavorful & aesthetic...'),
+                            SizedBox(width: 10),
+                            _buildReviewCard('John Doe', '4.8', 'Amazing food and great service!'),
+                            SizedBox(width: 10),
+                            _buildReviewCard('Jane Smith', '4.5', 'Highly recommend this place!'),
+                          ],
+                        ),
                       ),
                     ),
-                    onPressed: () {},
-                    child: Text('Add to plate', style: TextStyle(color: Colors.white)),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
-
-            // Meal details
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.location_on, color: Colors.brown),
-                          SizedBox(width: 5),
-                          Text('Location', style: TextStyle(color: Colors.brown)),
-                        ],
-                      ),
-                      Text('1500 Ksh', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Text('Steak Plate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 5),
-                  Text('Meal Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 5),
-                  Text(
-                    'A perfectly seared steak, cooked to your desired doneness, served with a side of creamy mashed potatoes, sautéed greens, and a rich, velvety sauce.',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  SizedBox(height: 20),
-                ],
               ),
-            ),
-
-            // Customer reviews
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildReviewCard('Brandon White', '4.2', 'Best Customer Service I’ve ever had...'),
-                  _buildReviewCard('Victoria Malen', '', 'The meals are so flavorful & aesthetic...'),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -200,36 +118,96 @@ class _MealScreenState extends State<MealScreen> {
 
   Widget _buildReviewCard(String name, String rating, String review) {
     return Container(
-      padding: EdgeInsets.all(10),
-      width: 150,
+      padding: EdgeInsets.all(12),
+      width: 160, // Slightly bigger width for review cards
       decoration: BoxDecoration(
         color: Color(0xFFF5DEB3), // Beige color
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.account_circle, color: Colors.brown),
-              SizedBox(width: 5),
-              Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
+              Icon(Icons.account_circle, color: Colors.brown, size: 24), // Slightly bigger icon
+              SizedBox(width: 8),
+              Text(
+                name,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Slightly bigger text
+              ),
               if (rating.isNotEmpty) ...[
-                SizedBox(width: 5),
-                Icon(Icons.star, color: Colors.orange, size: 16),
-                Text(rating),
+                SizedBox(width: 8),
+                Icon(Icons.star, color: Colors.orange, size: 18), // Slightly bigger star icon
+                Text(rating, style: TextStyle(fontSize: 16)), // Slightly bigger text
               ]
             ],
           ),
-          SizedBox(height: 5),
+          SizedBox(height: 8),
           Text(
             review,
-            maxLines: 2,
+            maxLines: 3, // Allow more lines for review text
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.black54),
+            style: TextStyle(color: Colors.black54, fontSize: 14), // Slightly bigger text
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
+    return BottomNavigationBar(
+      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      selectedItemColor: Colors.brown[700], // Darker icon color when selected
+      unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
+      showSelectedLabels: false,
+      showUnselectedLabels: false,
+      currentIndex: currentIndex,
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+        switch (index) {
+          case 0:
+            Navigator.pushNamed(context, '/home');
+            break;
+          case 1:
+            Navigator.pushNamed(context, '/search');
+            break;
+          case 2:
+          // Already on MealScreen, no need to navigate
+            break;
+          case 3:
+            Navigator.pushNamed(context, '/contact');
+            break;
+          case 4:
+            Navigator.pushNamed(context, '/profile');
+            break;
+        }
+      },
+      items: [
+        _buildBottomNavigationBarItem(Icons.home, 0, currentIndex),
+        _buildBottomNavigationBarItem(Icons.search, 1, currentIndex),
+        _buildBottomNavigationBarItem(Icons.restaurant_menu, 2, currentIndex),
+        _buildBottomNavigationBarItem(Icons.phone, 3, currentIndex),
+        _buildBottomNavigationBarItem(Icons.person, 4, currentIndex),
+      ],
+    );
+  }
+
+  BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
+    return BottomNavigationBarItem(
+      icon: Container(
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected
+        ),
+        child: Icon(
+          icon,
+          color: currentIndex == index ? Colors.white : Colors.brown[700], // Lighter icon when selected
+        ),
+      ),
+      label: "",
     );
   }
 }
@@ -249,8 +227,3 @@ class CurvedClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
-
-void main() => runApp(MaterialApp(
-  debugShowCheckedModeBanner: false,
-  home: MealScreen(),
-));

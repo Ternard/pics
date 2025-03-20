@@ -1,250 +1,176 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-class RestaurantScreen extends StatelessWidget {
+class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
+
+  @override
+  _RestaurantScreenState createState() => _RestaurantScreenState();
+}
+
+class _RestaurantScreenState extends State<RestaurantScreen> {
+  int _currentIndex = 2; // Track the current index
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
-      appBar: AppBar(
-        backgroundColor: Color(0xFFF5E1BE),
-        elevation: 0,
-        automaticallyImplyLeading: false, // Remove back button
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 18,
-              child: Icon(Icons.restaurant, color: Colors.black), // Placeholder for logo
-            ),
-            SizedBox(width: 10),
-            Text(
-              "MealMeter",
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.brown[600],
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 10),
-
-            // Food Image
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(50),
-                bottomRight: Radius.circular(50),
-              ),
-              child: Image.network(
-                "https://source.unsplash.com/400x300/?food,meat", // Replace with actual image URL
-                height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-
-            // Add to Plate Button
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.brown[700],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+      bottomNavigationBar: _buildBottomNavigationBar(_currentIndex, context),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.0),
+                color: Color(0xFFF5DEB3), // Beige color
+                child: Row(
+                  children: [
+                    Icon(Icons.restaurant, color: Colors.brown),
+                    SizedBox(width: 8.0),
+                    Text(
+                      'MealMeter',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.brown,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Text("Add to plate", style: TextStyle(fontSize: 18, color: Colors.white)),
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                child: Image.network(
+                  'https://source.unsplash.com/400x300/?restaurant',
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-
-            // Location & Price
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              SizedBox(height: 20),
+              Text(
+                'Shawarma Street',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown,
+                ),
+              ),
+              SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, color: Colors.brown[700]),
-                      SizedBox(width: 5),
-                      Text("Location", style: TextStyle(fontSize: 16, color: Colors.brown[800])),
-                    ],
+                  Icon(Icons.location_on, color: Colors.brown),
+                  SizedBox(width: 5),
+                  Text(
+                    'Restaurant Location',
+                    style: TextStyle(color: Colors.brown),
                   ),
-                  Text("1200 Ksh", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown[800])),
                 ],
               ),
-            ),
-            SizedBox(height: 15),
-
-            // Meal Title
-            Text(
-              "Meat Platter",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.brown[800]),
-            ),
-            SizedBox(height: 10),
-
-            // Meal Description
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30),
-              child: Text(
-                "An assortment of grilled meats, including succulent lamb, chicken kebabs, and beef skewers, accompanied by a side of flatbread and flavorful dipping sauces.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.brown[700]),
+              SizedBox(height: 10),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.brown,
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                ),
+                onPressed: () {},
+                child: Text('Menu', style: TextStyle(color: Colors.white)),
               ),
-            ),
-            SizedBox(height: 20),
-
-            // Customer Reviews
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ReviewCard(
-                  name: "Brandon White",
-                  rating: "4.2",
-                  review: "Best Customer Services I've ever had...",
-                ),
-                SizedBox(width: 10),
-                ReviewCard(
-                  name: "Victoria Malen",
-                  rating: "4.5",
-                  review: "The meals are so aesthetic... Just wow!",
-                ),
-              ],
-            ),
-          ],
+              SizedBox(height: 20),
+              _buildReviewCard('Brandon White', 4.2, 'Best Customer Services I’ve ever had...'),
+              _buildReviewCard('Victoria Malen', 4.5, 'The meals are so aesthetic...Just Wow!'),
+            ],
+          ),
         ),
-      ),
-
-      // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFFF5E1BE), // Beige background
-        selectedItemColor: Colors.brown[700], // Darker icon color when selected
-        unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        currentIndex: 2, // Restaurant is selected by default
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/home');
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/search');
-              break;
-            case 2:
-            // Already on RestaurantScreen, no need to navigate
-              break;
-            case 3:
-              Navigator.pushNamed(context, '/contact');
-              break;
-            case 4:
-              Navigator.pushNamed(context, '/profile');
-              break;
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
-              ),
-              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
-            ),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
-              ),
-              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
-            ),
-            label: "Search",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
-              ),
-              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
-            ),
-            label: "Menu",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
-              ),
-              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
-            ),
-            label: "Call",
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
-              ),
-              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
-            ),
-            label: "Profile",
-          ),
-        ],
       ),
     );
   }
-}
 
-// Review Card Widget
-class ReviewCard extends StatelessWidget {
-  final String name;
-  final String rating;
-  final String review;
-
-  const ReviewCard({super.key, required this.name, required this.rating, required this.review});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Color(0xFFEED9B5),
-        borderRadius: BorderRadius.circular(15),
+  Widget _buildReviewCard(String name, double rating, String review) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Container(
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Color(0xFFF5DEB3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.brown)),
+                Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.amber, size: 18),
+                    Text(rating.toString(), style: TextStyle(color: Colors.brown)),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 5),
+            Text(review, style: TextStyle(color: Colors.brown)),
+          ],
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "$name  ★ $rating",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.brown[800]),
-          ),
-          SizedBox(height: 5),
-          Text(
-            review,
-            style: TextStyle(fontSize: 12, color: Colors.brown[700]),
-          ),
-        ],
+    );
+  }
+
+  Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
+    return BottomNavigationBar(
+      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      selectedItemColor: Colors.brown[700], // Darker icon color when selected
+      unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
+      showSelectedLabels: false,
+      showUnselectedLabels: false,
+      currentIndex: currentIndex,
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+        switch (index) {
+          case 0:
+            Navigator.pushNamed(context, '/home');
+            break;
+          case 1:
+            Navigator.pushNamed(context, '/search');
+            break;
+          case 2:
+          // Already on RestaurantScreen, no need to navigate
+            break;
+          case 3:
+            Navigator.pushNamed(context, '/contact');
+            break;
+          case 4:
+            Navigator.pushNamed(context, '/profile');
+            break;
+        }
+      },
+      items: [
+        _buildBottomNavigationBarItem(Icons.home, 0, currentIndex),
+        _buildBottomNavigationBarItem(Icons.search, 1, currentIndex),
+        _buildBottomNavigationBarItem(Icons.restaurant_menu, 2, currentIndex),
+        _buildBottomNavigationBarItem(Icons.phone, 3, currentIndex),
+        _buildBottomNavigationBarItem(Icons.person, 4, currentIndex),
+      ],
+    );
+  }
+
+  BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
+    return BottomNavigationBarItem(
+      icon: Container(
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected
+        ),
+        child: Icon(
+          icon,
+          color: currentIndex == index ? Colors.white : Colors.brown[700], // Lighter icon when selected
+        ),
       ),
+      label: "",
     );
   }
 }
