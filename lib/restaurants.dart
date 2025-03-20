@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class RestaurantScreen extends StatelessWidget {
+class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
+
+  @override
+  _RestaurantScreenState createState() => _RestaurantScreenState();
+}
+
+class _RestaurantScreenState extends State<RestaurantScreen> {
+  int _currentIndex = 2; // Track the current index
 
   @override
   Widget build(BuildContext context) {
@@ -132,8 +139,11 @@ class RestaurantScreen extends StatelessWidget {
         unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: 2, // Restaurant is selected by default
+        currentIndex: _currentIndex, // Track the current index
         onTap: (index) {
+          setState(() {
+            _currentIndex = index; // Update the current index
+          });
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
@@ -158,9 +168,12 @@ class RestaurantScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.home,
+                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Home",
           ),
@@ -169,9 +182,12 @@ class RestaurantScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.search,
+                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Search",
           ),
@@ -180,9 +196,12 @@ class RestaurantScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.restaurant_menu,
+                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Menu",
           ),
@@ -191,9 +210,12 @@ class RestaurantScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.phone,
+                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Call",
           ),
@@ -202,9 +224,12 @@ class RestaurantScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.person,
+                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Profile",
           ),

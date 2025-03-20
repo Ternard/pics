@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0; // Track the current index
 
   @override
   Widget build(BuildContext context) {
@@ -120,11 +127,14 @@ class HomeScreen extends StatelessWidget {
         unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: 0, // Home is selected by default
+        currentIndex: _currentIndex, // Track the current index
         onTap: (index) {
+          setState(() {
+            _currentIndex = index; // Update the current index
+          });
           switch (index) {
             case 0:
-            // Already on HomeScreen, no need to navigate
+              Navigator.pushNamed(context, '/home');
               break;
             case 1:
               Navigator.pushNamed(context, '/search');
@@ -146,9 +156,12 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 0 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.home, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.home,
+                color: _currentIndex == 0 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Home",
           ),
@@ -157,9 +170,12 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 1 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.search, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.search,
+                color: _currentIndex == 1 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Search",
           ),
@@ -168,9 +184,12 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 2 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.restaurant_menu, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.restaurant_menu,
+                color: _currentIndex == 2 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Menu",
           ),
@@ -179,9 +198,12 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 3 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.phone, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.phone,
+                color: _currentIndex == 3 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Call",
           ),
@@ -190,9 +212,12 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.brown[100], // Lighter circle around the icon
+                color: _currentIndex == 4 ? Colors.brown[700] : Colors.brown[100], // Darker circle when selected
               ),
-              child: Icon(Icons.person, color: Colors.brown[700]), // Darker icon
+              child: Icon(
+                Icons.person,
+                color: _currentIndex == 4 ? Colors.white : Colors.brown[700], // Lighter icon when selected
+              ),
             ),
             label: "Profile",
           ),
