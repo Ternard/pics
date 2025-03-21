@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'new_meal.dart'; // Import the NewMealScreen
+import 'meal_review.dart'; // Import the MealReviewScreen
 
 class MealScreen extends StatefulWidget {
   const MealScreen({super.key});
@@ -9,6 +11,70 @@ class MealScreen extends StatefulWidget {
 
 class _MealScreenState extends State<MealScreen> {
   int _currentIndex = 2; // Track the current index
+
+  // Function to show the "Add New Meal" pop-up
+  void _showAddMealPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow the pop-up to be scrollable
+      backgroundColor: Colors.transparent, // Make the background transparent
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            child: NewMealScreen(
+              onSubmit: (bool success) {
+                Navigator.pop(context); // Close the pop-up
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? "Meal Added" : "Error"),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Function to show the "Add New Review" pop-up
+  void _showAddReviewPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow the pop-up to be scrollable
+      backgroundColor: Colors.transparent, // Make the background transparent
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            child: MealReviewScreen(
+              onSubmit: (bool success) {
+                Navigator.pop(context); // Close the pop-up
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? "Review Added" : "Error"),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +190,7 @@ class _MealScreenState extends State<MealScreen> {
             // Add New Meal Button (Bottom Left)
             FloatingActionButton(
               onPressed: () {
-                // Handle "Add New Meal" button press
+                _showAddMealPopup(context); // Show the "Add New Meal" pop-up
               },
               backgroundColor: Colors.brown,
               child: const Icon(Icons.add, color: Colors.white),
@@ -133,7 +199,7 @@ class _MealScreenState extends State<MealScreen> {
             // Add New Review Button (Bottom Right)
             FloatingActionButton(
               onPressed: () {
-                // Handle "Add New Review" button press
+                _showAddReviewPopup(context); // Show the "Add New Review" pop-up
               },
               backgroundColor: Colors.brown,
               child: const Icon(Icons.edit, color: Colors.white),

@@ -42,15 +42,30 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search Meals',
-                  filled: true,
-                  fillColor: Colors.brown[300], // Darker search bar background
-                  prefixIcon: Icon(Icons.search, color: Colors.brown[700]), // Darker search icon
-                  border: OutlineInputBorder(
+              // Replace TextField with TextButton for search
+              InkWell(
+                onTap: () {
+                  // Navigate to the search.dart file
+                  Navigator.pushNamed(context, '/search');
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.brown[300], // Darker search bar background
                     borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.brown[700]), // Darker search icon
+                      SizedBox(width: 8),
+                      Text(
+                        'Search Meals',
+                        style: TextStyle(
+                          color: Colors.brown[700], // Darker text color
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

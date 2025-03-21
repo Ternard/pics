@@ -127,35 +127,35 @@ class _SearchScreenState extends State<SearchScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
-            children: [
+          children: [
             Icon(icon, color: Colors.brown),
-        const SizedBox(width: 10),
-        Expanded(
-          child: isDropdown
-              ? DropdownButton<String>(
-            value: selectedValue,
-            hint: Text(hintText, style: TextStyle(color: Colors.brown)),
-            items: dropdownItems?.map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value, style: TextStyle(color: Colors.brown)),
-              );
-            }).toList(),
-            onChanged: onChanged,
-            underline: const SizedBox(), // Remove the default underline
-            isExpanded: true, // Allow the dropdown to expand
-          )
-              : TextField(
-            decoration: InputDecoration(
-                hintText: hintText,
-                border: InputBorder.none,
-                hintStyle: TextStyle(color: Colors.brown)),
-          ),
-        ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: isDropdown
+                  ? DropdownButton<String>(
+                value: selectedValue,
+                hint: Text(hintText, style: TextStyle(color: Colors.brown)),
+                items: dropdownItems?.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.brown)),
+                  );
+                }).toList(),
+                onChanged: onChanged,
+                underline: const SizedBox(), // Remove the default underline
+                isExpanded: true, // Allow the dropdown to expand
+              )
+                  : TextField(
+                decoration: InputDecoration(
+                    hintText: hintText,
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.brown)),
+              ),
+            ),
 
-      ],
-    ),
-    ),
+          ],
+        ),
+      ),
     );
   }
 

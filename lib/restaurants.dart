@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'new_restaurant.dart'; // Import the NewRestaurantScreen
+import 'restaurant_review.dart'; // Import the RestaurantReviewScreen
 
 class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
@@ -9,6 +11,70 @@ class RestaurantScreen extends StatefulWidget {
 
 class _RestaurantScreenState extends State<RestaurantScreen> {
   int _currentIndex = 2; // Track the current index
+
+  // Function to show the "Add New Restaurant" pop-up
+  void _showAddRestaurantPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow the pop-up to be scrollable
+      backgroundColor: Colors.transparent, // Make the background transparent
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            child: NewRestaurantScreen(
+              onSubmit: (bool success) {
+                Navigator.pop(context); // Close the pop-up
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? "Submission Added" : "Error"),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Function to show the "Add New Review" pop-up
+  void _showAddReviewPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow the pop-up to be scrollable
+      backgroundColor: Colors.transparent, // Make the background transparent
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            child: RestaurantReviewScreen(
+              onSubmit: (bool success) {
+                Navigator.pop(context); // Close the pop-up
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? "Review Added" : "Error"),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +90,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 color: const Color(0xFFF5DEB3), // Beige color
                 child: Row(
                   children: [
-                    Image.asset(
-                      'assets/logo.png', // Replace with your logo asset
-                      width: 40,
-                      height: 40,
-                    ),
+                    Icon(Icons.restaurant, color: Colors.brown),
                     const SizedBox(width: 8.0),
                     Text(
                       'MealMeter',
@@ -127,14 +189,14 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           children: [
             FloatingActionButton(
               onPressed: () {
-                // Handle "Add New Restaurant" button press
+                _showAddRestaurantPopup(context); // Show the "Add New Restaurant" pop-up
               },
               backgroundColor: Colors.brown,
               child: const Icon(Icons.add, color: Colors.white),
             ),
             FloatingActionButton(
               onPressed: () {
-                // Handle "Add New Review" button press
+                _showAddReviewPopup(context); // Show the "Add New Review" pop-up
               },
               backgroundColor: Colors.brown,
               child: const Icon(Icons.edit, color: Colors.white),
