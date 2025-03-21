@@ -24,7 +24,11 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 color: const Color(0xFFF5DEB3), // Beige color
                 child: Row(
                   children: [
-                    Icon(Icons.restaurant, color: Colors.brown),
+                    Image.asset(
+                      'assets/logo.png', // Replace with your logo asset
+                      width: 40,
+                      height: 40,
+                    ),
                     const SizedBox(width: 8.0),
                     Text(
                       'MealMeter',

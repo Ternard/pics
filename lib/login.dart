@@ -7,35 +7,22 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
-      body: SingleChildScrollView(
-        child: Center(
+      backgroundColor: const Color(0xFFF5E1BE), // Beige background
+      body: Center(
+        child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center, // Center items vertically
+              crossAxisAlignment: CrossAxisAlignment.center, // Center items horizontally
               children: [
                 // Logo and App Name
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 20,
-                      child: Icon(Icons.restaurant_menu, color: Colors.brown),
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      "MealMeter",
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.brown[700],
-                      ),
-                    ),
-                  ],
+                Image.asset(
+                  'assets/logo.png', // Replace with your logo asset
+                  width: 100,
+                  height: 100,
                 ),
-                SizedBox(height: 40),
+                const SizedBox(height: 20),
 
                 // Login Title
                 Text(
@@ -46,34 +33,17 @@ class LoginPage extends StatelessWidget {
                     color: Colors.brown[800],
                   ),
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
 
                 // Email Input Field
                 _buildTextField("Email"),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
 
                 // Password Input Field
                 _buildTextField("Password", obscureText: true),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                // Sign Up Text
-                GestureDetector(
-                  onTap: () {
-                    // Navigate to the SignUpScreen
-                    Navigator.pushNamed(context, '/signup');
-                  },
-                  child: Text(
-                    "Don’t have an account? Sign Up",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.brown[700],
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 25),
-
-                // Login Button
+                // Log In Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -97,6 +67,23 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 10),
+
+                // Sign Up Text Button (Moved below the Log In button)
+                TextButton(
+                  onPressed: () {
+                    // Navigate to the SignUpScreen
+                    Navigator.pushNamed(context, '/signup');
+                  },
+                  child: Text(
+                    "Don’t have an account? Sign Up",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.brown[700],
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -117,7 +104,7 @@ class LoginPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
         ),
-        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
       ),
     );
   }

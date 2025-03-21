@@ -12,7 +12,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   File? _image; // To store the selected image
-  bool _notificationsEnabled = true; // To track notifications state
   String? _password; // To store the password passed from sign_up.dart
 
   @override
@@ -44,10 +43,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         automaticallyImplyLeading: false, // Remove back button
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 18,
-              child: Icon(Icons.restaurant, color: Colors.black), // Placeholder for logo
+            Image.asset(
+              'assets/logo.png', // Replace with your logo asset
+              width: 40,
+              height: 40,
             ),
             const SizedBox(width: 10),
             Text(
@@ -70,16 +69,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Profile ID Circle with Image Picker
             GestureDetector(
               onTap: _pickImage, // Allow user to pick an image
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.brown[300],
-                backgroundImage: _image != null ? FileImage(_image!) : null, // Display selected image
-                child: _image == null
-                    ? Text(
-                  "ID",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                )
-                    : null, // Hide text if image is selected
+              child: Stack(
+                alignment: Alignment.bottomRight, // Align the edit icon to the bottom right
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.brown[300],
+                    backgroundImage: _image != null ? FileImage(_image!) : null, // Display selected image
+                    child: _image == null
+                        ? Text(
+                      "ID",
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                    )
+                        : null, // Hide text if image is selected
+                  ),
+                  // Edit Icon
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.brown[700], // Dark brown background for the edit icon
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.edit,
+                      size: 20,
+                      color: Colors.white, // White edit icon
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Hint text to indicate the picture is editable
+            Text(
+              "Tap to change picture",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.brown[700],
+                fontStyle: FontStyle.italic,
               ),
             ),
             const SizedBox(height: 20),
@@ -89,26 +116,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ProfileField(text: "Email"),
             ProfileField(text: _password ?? "Your Password"), // Display the password or a placeholder
             const SizedBox(height: 20),
-
-            // Notifications Toggle
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Checkbox(
-                  value: _notificationsEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      _notificationsEnabled = value ?? false; // Update notifications state
-                    });
-                  },
-                ),
-                Text(
-                  _notificationsEnabled ? "Notifications On" : "Notifications Off",
-                  style: TextStyle(fontSize: 16, color: Colors.brown[700]),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
 
             // Logout Button
             TextButton.icon(

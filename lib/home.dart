@@ -10,9 +10,10 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.restaurant_menu, color: Colors.brown),
+            Image.asset(
+              'assets/logo.png', // Replace with your logo asset
+              width: 40,
+              height: 40,
             ),
             SizedBox(width: 8),
             Text(
