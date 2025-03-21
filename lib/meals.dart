@@ -11,6 +11,7 @@ class MealScreen extends StatefulWidget {
 
 class _MealScreenState extends State<MealScreen> {
   int _currentIndex = 2; // Track the current index
+  final PageController _pageController = PageController(); // PageView controller
 
   // Function to show the "Add New Meal" pop-up
   void _showAddMealPopup(BuildContext context) {
@@ -81,113 +82,62 @@ class _MealScreenState extends State<MealScreen> {
     return Scaffold(
       bottomNavigationBar: _buildBottomNavigationBar(_currentIndex, context),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header with image
-              Stack(
+        child: Column(
+          children: [
+            // PageView for horizontal navigation
+            Expanded(
+              child: Stack(
                 children: [
-                  ClipPath(
-                    clipper: CurvedClipper(),
-                    child: Image.asset(
-                      'assets/steak_plate.jpg', // Replace with your image asset
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
+                  PageView(
+                    controller: _pageController,
+                    children: [
+                      // Page 1
+                      _buildMealPage(),
+                      // Page 2 (Add more pages as needed)
+                      _buildMealPage(),
+                      _buildMealPage(),
+                    ],
+                  ),
+                  // Left Arrow
+                  Positioned(
+                    left: 10,
+                    top: MediaQuery.of(context).size.height / 2 - 20,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_ios, color: Colors.brown),
+                      onPressed: () {
+                        _pageController.previousPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
+                  ),
+                  // Right Arrow
+                  Positioned(
+                    right: 10,
+                    top: MediaQuery.of(context).size.height / 2 - 20,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_forward_ios, color: Colors.brown),
+                      onPressed: () {
+                        _pageController.nextPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
                     ),
                   ),
                 ],
               ),
-              // Add to Plate button below the image
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () {},
-                  child: const Text('Add to plate', style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Meal details
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, color: Colors.brown),
-                            const SizedBox(width: 5),
-                            Text('Location', style: TextStyle(color: Colors.brown)),
-                          ],
-                        ),
-                        Text('1500 Ksh', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text('Steak Plate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    Text('Meal Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    Text(
-                      'A perfectly seared steak, cooked to your desired doneness, served with a side of creamy mashed potatoes, sautéed greens, and a rich, velvety sauce.',
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-
-              // Customer reviews with horizontal scroll
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Customer Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 180, // Fixed height for the reviews section
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildReviewCard('Brandon White', '4.2', 'Best Customer Service I’ve ever had...'),
-                            const SizedBox(width: 10),
-                            _buildReviewCard('Victoria Malen', '', 'The meals are so flavorful & aesthetic...'),
-                            const SizedBox(width: 10),
-                            _buildReviewCard('John Doe', '4.8', 'Amazing food and great service!'),
-                            const SizedBox(width: 10),
-                            _buildReviewCard('Jane Smith', '4.5', 'Highly recommend this place!'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-
       // Add New Meal and Add New Review Buttons
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Add New Meal Button (Bottom Left)
             FloatingActionButton(
               onPressed: () {
                 _showAddMealPopup(context); // Show the "Add New Meal" pop-up
@@ -195,8 +145,6 @@ class _MealScreenState extends State<MealScreen> {
               backgroundColor: Colors.brown,
               child: const Icon(Icons.add, color: Colors.white),
             ),
-
-            // Add New Review Button (Bottom Right)
             FloatingActionButton(
               onPressed: () {
                 _showAddReviewPopup(context); // Show the "Add New Review" pop-up
@@ -206,6 +154,108 @@ class _MealScreenState extends State<MealScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Build a single meal page
+  Widget _buildMealPage() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Header with image
+          Stack(
+            children: [
+              ClipPath(
+                clipper: CurvedClipper(),
+                child: Image.asset(
+                  'assets/steak_plate.jpg', // Replace with your image asset
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+          ),
+          // Add to Plate button below the image
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.brown,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {},
+              child: const Text('Add to plate', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Meal details
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, color: Colors.brown),
+                        const SizedBox(width: 5),
+                        Text('Location', style: TextStyle(color: Colors.brown)),
+                      ],
+                    ),
+                    Text('1500 Ksh', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text('Steak Plate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 5),
+                Text('Meal Description', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 5),
+                Text(
+                  'A perfectly seared steak, cooked to your desired doneness, served with a side of creamy mashed potatoes, sautéed greens, and a rich, velvety sauce.',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+
+          // Customer reviews with horizontal scroll
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Customer Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 180, // Fixed height for the reviews section
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildReviewCard('Brandon White', '4.2', 'Best Customer Service I’ve ever had...'),
+                        const SizedBox(width: 10),
+                        _buildReviewCard('Victoria Malen', '', 'The meals are so flavorful & aesthetic...'),
+                        const SizedBox(width: 10),
+                        _buildReviewCard('John Doe', '4.8', 'Amazing food and great service!'),
+                        const SizedBox(width: 10),
+                        _buildReviewCard('Jane Smith', '4.5', 'Highly recommend this place!'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
