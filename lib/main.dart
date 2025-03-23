@@ -1,7 +1,7 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
-import 'package:image_picker/image_picker.dart';
 import 'contact_us.dart'; // Import the ContactUsScreen
 import 'home.dart'; // Import the HomeScreen
 import 'login.dart'; // Import the LoginPage
@@ -10,6 +10,7 @@ import 'profile.dart'; // Import the ProfileScreen
 import 'restaurants.dart'; // Import the RestaurantScreen
 import 'search.dart'; // Import the SearchScreen
 import 'sign_up.dart'; // Import the SignUpScreen
+import 'settings.dart'; // Import the SettingsPage
 
 void main() async {
   // Ensure Flutter is initialized
@@ -43,6 +44,7 @@ class MealMeterApp extends StatelessWidget {
         '/restaurant': (context) => RestaurantScreen(), // RestaurantScreen
         '/search': (context) => SearchScreen(), // SearchScreen
         '/contact': (context) => ContactUsScreen(), // ContactUsScreen
+        '/settings': (context) => SettingsPage(), // SettingsPage
       },
     );
   }
@@ -54,7 +56,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE), // Beige background
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -65,7 +67,7 @@ class SplashScreen extends StatelessWidget {
               width: 120,
               height: 120,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Get Started Button
             ElevatedButton(
@@ -75,12 +77,12 @@ class SplashScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.brown[700],
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 "Get Started",
                 style: TextStyle(
                   fontSize: 18,
