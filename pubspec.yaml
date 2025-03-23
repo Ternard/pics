@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.0
+  sdk: '>=3.0.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,6 +34,7 @@ dependencies:
   image_picker: ^1.1.2
   url_launcher: ^6.1.5
 
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -44,6 +45,10 @@ dev_dependencies:
   flutter_launcher_icons: "^0.14.3"
   flutter_lints: ^5.0.0
   flutter_native_splash: ^2.4.5
+  supabase_flutter: ^2.8.4
+  image_picker: ^1.1.2 # or ^0.8.7+4
+
+
 
 flutter_native_splash:
   color: "#0xFFF5E1BE"
@@ -86,6 +91,11 @@ flutter:
       - assets/tiktok.png
       - assets/instagram.png
       - assets/logo.png
+      - assets/steak_plate.jpg
+      - assets/cjs.jpg
+      - assets/shawarma.jpg
+      - assets/chicken_wings.jpg
+      - assets/shawarma_food.jpg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

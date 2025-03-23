@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
+import 'package:image_picker/image_picker.dart';
 import 'contact_us.dart'; // Import the ContactUsScreen
 import 'home.dart'; // Import the HomeScreen
 import 'login.dart'; // Import the LoginPage
@@ -9,7 +11,17 @@ import 'restaurants.dart'; // Import the RestaurantScreen
 import 'search.dart'; // Import the SearchScreen
 import 'sign_up.dart'; // Import the SignUpScreen
 
-void main() {
+void main() async {
+  // Ensure Flutter is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://pokfgifldgnorifrmetp.supabase.co', // Replace with your Supabase URL
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBva2ZnaWZsZGdub3JpZnJtZXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNzA1NTYsImV4cCI6MjA1Nzk0NjU1Nn0.DcQuWYaEw9DqjCer7PENJG9hMEYTMr-KOui4ia23WQQ', // Replace with your Supabase anon key
+  );
+
+  // Run the app
   runApp(MealMeterApp());
 }
 

@@ -99,8 +99,8 @@ class HomeScreen extends StatelessWidget {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 children: [
-                  buildRestaurantCard('Chicken Wings', 'Kenyan', '4.5(100+ Reviews)', '', 'assets/chicken_wings.jpg'),
-                  buildRestaurantCard('Shawarma', 'Indian', '3.9(600+ Reviews)', '', 'assets/shawarma_food.jpg'),
+                  buildRestaurantCard('CJ’s', 'Kenyan', '4.5(100+ Reviews)', '2km Away', 'assets/cjs.jpg'),
+                  buildRestaurantCard('Shawarma Street', 'Kenyan', '3.9(600+ Reviews)', '2km Away', 'assets/shawarma.jpg'),
                 ],
               ),
             ],
@@ -120,7 +120,11 @@ class HomeScreen extends StatelessWidget {
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.asset(imagePath, fit: BoxFit.cover, width: double.infinity),
+              child: Image.asset(
+                imagePath, // Replace with your image asset
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
             ),
           ),
           Padding(

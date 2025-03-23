@@ -90,7 +90,7 @@ class ContactUsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                "+254 708 756 456",
+                "+254 791 192 168",
                 style: TextStyle(fontSize: 14, color: Colors.brown[700]),
               ),
 

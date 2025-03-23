@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io'; // Import for File class
+
 
 class NewMealScreen extends StatefulWidget {
   final Function(bool) onSubmit;
@@ -14,11 +17,29 @@ class _NewMealScreenState extends State<NewMealScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  XFile? _image;
 
-  void _submit() {
-    // Simulate submission logic
-    bool success = true; // Replace with actual submission logic
-    widget.onSubmit(success); // Notify the parent about the submission result
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      _image = pickedFile;
+    });
+  }
+
+  void _submit() async {
+    if (_image != null) {
+      final file = File(_image!.path);
+      // Upload the file to Supabase or another server
+      // Example: Supabase storage upload
+      // final response = await Supabase.instance.client.storage.from('bucket-name').upload('path/to/upload', file);
+      // if (response.error == null) {
+      //   widget.onSubmit(true); // Success
+      // } else {
+      //   widget.onSubmit(false); // Failure
+      // }
+    } else {
+      widget.onSubmit(false); // No image selected
+    }
   }
 
   @override
@@ -39,6 +60,19 @@ class _NewMealScreenState extends State<NewMealScreen> {
             ),
           ),
           const SizedBox(height: 20),
+
+          // Image Picker
+          if (_image != null)
+            Image.file(
+              File(_image!.path),
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+          ElevatedButton(
+            onPressed: _pickImage,
+            child: Text("Pick Image"),
+          ),
 
           // Name Field
           TextField(

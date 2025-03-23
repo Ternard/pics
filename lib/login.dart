@@ -1,91 +1,135 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
+  Future<void> _login(BuildContext context, String email, String password) async {
+    try {
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.user != null) {
+        // Track the login in Supabase
+        await Supabase.instance.client
+            .from('user_logins')
+            .insert({
+          'user_id': response.user!.id,
+          'email': email,
+          'login_time': DateTime.now().toIso8601String(),
+        })
+            ._execute();
+
+        // Navigate to the home screen
+        Navigator.pushNamed(context, '/home');
+      }
+    } catch (e) {
+      // Handle login error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5E1BE), // Beige background
+      backgroundColor: Color(0xFFF5E1BE), // Beige background
       body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center items vertically
-              crossAxisAlignment: CrossAxisAlignment.center, // Center items horizontally
-              children: [
-                // Logo and App Name
-                Image.asset(
-                  'assets/logo.png', // Replace with your logo asset
-                  width: 100,
-                  height: 100,
-                ),
-                const SizedBox(height: 20),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo and App Name
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 20,
+                    child: Icon(Icons.restaurant_menu, color: Colors.brown),
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    "MealMeter",
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[700],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 40),
 
-                // Login Title
-                Text(
-                  "Log In",
+              // Login Title
+              Text(
+                "Log In",
+                style: GoogleFonts.poppins(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                ),
+              ),
+              SizedBox(height: 30),
+
+              // Email Input Field
+              _buildTextField("Email", controller: emailController),
+              SizedBox(height: 15),
+
+              // Password Input Field
+              _buildTextField("Password", controller: passwordController, obscureText: true),
+              SizedBox(height: 20),
+
+              // Sign Up Text
+              GestureDetector(
+                onTap: () {
+                  // Navigate to the SignUpScreen
+                  Navigator.pushNamed(context, '/signup');
+                },
+                child: Text(
+                  "Don’t have an account? Sign Up",
                   style: GoogleFonts.poppins(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.brown[800],
+                    fontSize: 14,
+                    color: Colors.brown[700],
+                    decoration: TextDecoration.underline,
                   ),
                 ),
-                const SizedBox(height: 30),
+              ),
+              SizedBox(height: 25),
 
-                // Email Input Field
-                _buildTextField("Email"),
-                const SizedBox(height: 15),
-
-                // Password Input Field
-                _buildTextField("Password", obscureText: true),
-                const SizedBox(height: 20),
-
-                // Log In Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.brown[700],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      // Login function
-                    },
-                    child: Text(
-                      "Log In",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+              // Login Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown[700],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-
-                // Sign Up Text Button (Moved below the Log In button)
-                TextButton(
                   onPressed: () {
-                    // Navigate to the SignUpScreen
-                    Navigator.pushNamed(context, '/signup');
+                    _login(context, emailController.text, passwordController.text);
                   },
                   child: Text(
-                    "Don’t have an account? Sign Up",
+                    "Log In",
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.brown[700],
-                      decoration: TextDecoration.underline,
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -93,8 +137,9 @@ class LoginPage extends StatelessWidget {
   }
 
   // Custom Input Field Widget
-  Widget _buildTextField(String hintText, {bool obscureText = false}) {
+  Widget _buildTextField(String hintText, {bool obscureText = false, TextEditingController? controller}) {
     return TextField(
+      controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hintText,
@@ -104,8 +149,12 @@ class LoginPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
       ),
     );
   }
+}
+
+extension on PostgrestFilterBuilder {
+  _execute() {}
 }
