@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart'; // For opening URLs
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactUsScreen extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
@@ -9,13 +9,11 @@ class ContactUsScreen extends StatelessWidget {
 
   ContactUsScreen({super.key});
 
-  // Function to open URLs
   Future<void> _launchURL(String url, BuildContext context) async {
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
-      print('Could not launch $url'); // Log the error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not launch $url')),
       );
@@ -33,16 +31,12 @@ class ContactUsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 80),
-
-              // Logo and App Name
               Image.asset(
-                'assets/logo.png', // Replace with your logo asset
+                'assets/logo.png',
                 width: 100,
                 height: 100,
               ),
               const SizedBox(height: 20),
-
-              // Contact Us Title
               Text(
                 "Contact Us",
                 style: GoogleFonts.playfairDisplay(
@@ -52,22 +46,16 @@ class ContactUsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Input Fields
               buildTextField("Your Name", nameController),
               const SizedBox(height: 10),
               buildTextField("Your Email", emailController),
               const SizedBox(height: 10),
               buildTextField("What can we help you with?", messageController, maxLines: 4),
               const SizedBox(height: 20),
-
-              // Submit Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown[700],
                     shape: RoundedRectangleBorder(
@@ -82,8 +70,6 @@ class ContactUsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Contact Information
               Text(
                 "mealmeter@gmail.com",
                 style: TextStyle(fontSize: 14, color: Colors.brown[700]),
@@ -93,41 +79,36 @@ class ContactUsScreen extends StatelessWidget {
                 "+254 791 192 168",
                 style: TextStyle(fontSize: 14, color: Colors.brown[700]),
               ),
-
-              // Social Media Icons
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // X (Twitter) Icon
                   IconButton(
                     onPressed: () {
-                      _launchURL("https://x.com/?lang=en", context); // Pass context here
+                      _launchURL("https://x.com/?lang=en", context);
                     },
                     icon: Image.asset(
-                      'assets/twitter.png', // Add an X (Twitter) icon asset
+                      'assets/twitter.png',
                       width: 24,
                       height: 24,
                     ),
                   ),
-                  // TikTok Icon
                   IconButton(
                     onPressed: () {
-                      _launchURL("https://www.tiktok.com/foryou?lang=en", context); // Pass context here
+                      _launchURL("https://www.tiktok.com/foryou?lang=en", context);
                     },
                     icon: Image.asset(
-                      'assets/tiktok.png', // Add a TikTok icon asset
+                      'assets/tiktok.png',
                       width: 24,
                       height: 24,
                     ),
                   ),
-                  // Instagram Icon
                   IconButton(
                     onPressed: () {
-                      _launchURL("https://www.instagram.com/", context); // Pass context here
+                      _launchURL("https://www.instagram.com/", context);
                     },
                     icon: Image.asset(
-                      'assets/instagram.png', // Add an Instagram icon asset
+                      'assets/instagram.png',
                       width: 24,
                       height: 24,
                     ),
@@ -139,13 +120,10 @@ class ContactUsScreen extends StatelessWidget {
           ),
         ),
       ),
-
-      // Bottom Navigation Bar
       bottomNavigationBar: _buildBottomNavigationBar(3, context),
     );
   }
 
-  // Custom TextField Widget
   Widget buildTextField(String hintText, TextEditingController controller, {int maxLines = 1}) {
     return TextField(
       controller: controller,
@@ -162,12 +140,11 @@ class ContactUsScreen extends StatelessWidget {
     );
   }
 
-  // Bottom Navigation Bar
   Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: const Color(0xFFF5E1BE), // Beige background
-      selectedItemColor: Colors.brown[700], // Darker icon color when selected
-      unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
+      backgroundColor: const Color(0xFFF5E1BE),
+      selectedItemColor: Colors.brown[700],
+      unselectedItemColor: Colors.brown[400],
       showSelectedLabels: false,
       showUnselectedLabels: false,
       currentIndex: currentIndex,
@@ -183,7 +160,6 @@ class ContactUsScreen extends StatelessWidget {
             Navigator.pushNamed(context, '/restaurant');
             break;
           case 3:
-          // Already on ContactUsScreen, no need to navigate
             break;
           case 4:
             Navigator.pushNamed(context, '/profile');
@@ -191,30 +167,30 @@ class ContactUsScreen extends StatelessWidget {
         }
       },
       items: [
-        _buildBottomNavigationBarItem(Icons.home, 0, currentIndex),
-        _buildBottomNavigationBarItem(Icons.search, 1, currentIndex),
-        _buildBottomNavigationBarItem(Icons.restaurant_menu, 2, currentIndex),
-        _buildBottomNavigationBarItem(Icons.phone, 3, currentIndex),
-        _buildBottomNavigationBarItem(Icons.person, 4, currentIndex),
+        _buildNavItem(Icons.home, 0, currentIndex),
+        _buildNavItem(Icons.search, 1, currentIndex),
+        _buildNavItem(Icons.restaurant_menu, 2, currentIndex),
+        _buildNavItem(Icons.phone, 3, currentIndex),
+        _buildNavItem(Icons.person, 4, currentIndex),
       ],
     );
   }
 
-  // Bottom Navigation Bar Item
-  BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
+  BottomNavigationBarItem _buildNavItem(IconData icon, int index, int currentIndex) {
+    final isSelected = currentIndex == index;
     return BottomNavigationBarItem(
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected
+          color: isSelected ? Colors.brown[700] : Colors.brown[100],
         ),
         child: Icon(
           icon,
-          color: currentIndex == index ? Colors.white : Colors.brown[700], // Lighter icon when selected
+          color: isSelected ? Colors.white : Colors.brown[700],
         ),
       ),
-      label: "",
+      label: '',
     );
   }
 }

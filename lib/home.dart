@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5E7C5), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE), // Consistent beige background
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFFF5E1BE),
         elevation: 0,
+        automaticallyImplyLeading: false, // This removes the back arrow
         title: Row(
           children: [
             Image.asset(
-              'assets/logo.png', // Replace with your logo asset
+              'assets/logo.png',
               width: 40,
               height: 40,
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               'MealMeter',
-              style: TextStyle(
+              style: GoogleFonts.playfairDisplay(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.brown,
+                color: Colors.brown[700],
               ),
             ),
           ],
@@ -29,39 +31,37 @@ class HomeScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Find the perfect meal within your Budget',
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Colors.brown,
+                  color: Colors.brown[800],
                 ),
               ),
-              SizedBox(height: 10),
-              // Replace TextField with TextButton for search
+              const SizedBox(height: 10),
               InkWell(
                 onTap: () {
-                  // Navigate to the search.dart file
                   Navigator.pushNamed(context, '/search');
                 },
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.brown[300], // Darker search bar background
+                    color: Colors.brown[300],
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.search, color: Colors.brown[700]), // Darker search icon
-                      SizedBox(width: 8),
+                      Icon(Icons.search, color: Colors.brown[700]),
+                      const SizedBox(width: 8),
                       Text(
                         'Search Meals',
                         style: TextStyle(
-                          color: Colors.brown[700], // Darker text color
+                          color: Colors.brown[700],
                           fontSize: 16,
                         ),
                       ),
@@ -69,37 +69,45 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
                 'Restaurants near you...',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               GridView.count(
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  buildRestaurantCard('CJ’s', 'Kenyan', '4.5(100+ Reviews)', '2km Away', 'assets/cjs.jpg'),
+                  buildRestaurantCard('CJ\'s', 'Kenyan', '4.5(100+ Reviews)', '2km Away', 'assets/cjs.jpg'),
                   buildRestaurantCard('Shawarma Street', 'Kenyan', '3.9(600+ Reviews)', '2km Away', 'assets/shawarma.jpg'),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 'Your History...',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               GridView.count(
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  buildRestaurantCard('CJ’s', 'Kenyan', '4.5(100+ Reviews)', '2km Away', 'assets/cjs.jpg'),
+                  buildRestaurantCard('CJ\'s', 'Kenyan', '4.5(100+ Reviews)', '2km Away', 'assets/cjs.jpg'),
                   buildRestaurantCard('Shawarma Street', 'Kenyan', '3.9(600+ Reviews)', '2km Away', 'assets/shawarma.jpg'),
                 ],
               ),
@@ -119,23 +127,23 @@ class HomeScreen extends StatelessWidget {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
               child: Image.asset(
-                imagePath, // Replace with your image asset
+                imagePath,
                 fit: BoxFit.cover,
                 width: double.infinity,
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(type, style: TextStyle(color: Colors.grey)),
-                Text(rating, style: TextStyle(color: Colors.orange)),
-                if (distance.isNotEmpty) Text(distance, style: TextStyle(color: Colors.grey)),
+                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(type, style: TextStyle(color: Colors.grey[600])),
+                Text(rating, style: const TextStyle(color: Colors.orange)),
+                if (distance.isNotEmpty) Text(distance, style: TextStyle(color: Colors.grey[600])),
               ],
             ),
           ),
@@ -146,9 +154,9 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
-      selectedItemColor: Colors.brown[700], // Darker icon color when selected
-      unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
+      backgroundColor: const Color(0xFFF5E1BE),
+      selectedItemColor: Colors.brown[700],
+      unselectedItemColor: Colors.brown[400],
       showSelectedLabels: false,
       showUnselectedLabels: false,
       currentIndex: currentIndex,
@@ -172,29 +180,30 @@ class HomeScreen extends StatelessWidget {
         }
       },
       items: [
-        _buildBottomNavigationBarItem(Icons.home, 0, currentIndex),
-        _buildBottomNavigationBarItem(Icons.search, 1, currentIndex),
-        _buildBottomNavigationBarItem(Icons.restaurant_menu, 2, currentIndex),
-        _buildBottomNavigationBarItem(Icons.phone, 3, currentIndex),
-        _buildBottomNavigationBarItem(Icons.person, 4, currentIndex),
+        _buildNavItem(Icons.home, 0, currentIndex),
+        _buildNavItem(Icons.search, 1, currentIndex),
+        _buildNavItem(Icons.restaurant_menu, 2, currentIndex),
+        _buildNavItem(Icons.phone, 3, currentIndex),
+        _buildNavItem(Icons.person, 4, currentIndex),
       ],
     );
   }
 
-  BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
+  BottomNavigationBarItem _buildNavItem(IconData icon, int index, int currentIndex) {
+    final isSelected = currentIndex == index;
     return BottomNavigationBarItem(
       icon: Container(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected
+          color: isSelected ? Colors.brown[700] : Colors.brown[100],
         ),
         child: Icon(
           icon,
-          color: currentIndex == index ? Colors.white : Colors.brown[700], // Lighter icon when selected
+          color: isSelected ? Colors.white : Colors.brown[700],
         ),
       ),
-      label: "",
+      label: '',
     );
   }
 }

@@ -152,7 +152,6 @@ class _SearchScreenState extends State<SearchScreen> {
                     hintStyle: TextStyle(color: Colors.brown)),
               ),
             ),
-
           ],
         ),
       ),
@@ -162,22 +161,21 @@ class _SearchScreenState extends State<SearchScreen> {
   // Bottom Navigation Bar
   Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: const Color(0xFFF5E1BE), // Beige background
-      selectedItemColor: Colors.brown[700], // Darker icon color when selected
-      unselectedItemColor: Colors.brown[400], // Lighter icon color when unselected
+      backgroundColor: const Color(0xFFF5E1BE),
+      selectedItemColor: Colors.brown[700],
+      unselectedItemColor: Colors.brown[400],
       showSelectedLabels: false,
       showUnselectedLabels: false,
       currentIndex: currentIndex,
       onTap: (index) {
         setState(() {
-          _currentIndex = index; // Update the current index
+          _currentIndex = index;
         });
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
             break;
           case 1:
-          // Already on SearchScreen, no need to navigate
             break;
           case 2:
             Navigator.pushNamed(context, '/restaurant');
@@ -191,30 +189,30 @@ class _SearchScreenState extends State<SearchScreen> {
         }
       },
       items: [
-        _buildBottomNavigationBarItem(Icons.home, 0, currentIndex),
-        _buildBottomNavigationBarItem(Icons.search, 1, currentIndex),
-        _buildBottomNavigationBarItem(Icons.restaurant_menu, 2, currentIndex),
-        _buildBottomNavigationBarItem(Icons.phone, 3, currentIndex),
-        _buildBottomNavigationBarItem(Icons.person, 4, currentIndex),
+        _buildNavItem(Icons.home, 0),
+        _buildNavItem(Icons.search, 1),
+        _buildNavItem(Icons.restaurant_menu, 2),
+        _buildNavItem(Icons.phone, 3),
+        _buildNavItem(Icons.person, 4),
       ],
     );
   }
 
-  // Bottom Navigation Bar Item
-  BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index, int currentIndex) {
+  BottomNavigationBarItem _buildNavItem(IconData icon, int index) {
+    final isSelected = _currentIndex == index;
     return BottomNavigationBarItem(
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: currentIndex == index ? Colors.brown[700] : Colors.transparent, // Dark circle when selected
+          color: isSelected ? Colors.brown[700] : Colors.brown[100],
         ),
         child: Icon(
           icon,
-          color: currentIndex == index ? Colors.white : Colors.brown[700], // Lighter icon when selected
+          color: isSelected ? Colors.white : Colors.brown[700],
         ),
       ),
-      label: "",
+      label: '',
     );
   }
 }

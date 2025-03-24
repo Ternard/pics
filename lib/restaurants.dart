@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'new_restaurant.dart';
 import 'restaurant_review.dart';
-import 'menu.dart'; // Import the MenuScreen
+import 'menu.dart';
 
 class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
@@ -14,7 +14,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   int _currentIndex = 2;
   final PageController _pageController = PageController();
 
-  // Function to show menu popup
   void _showMenuPopup(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -29,13 +28,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: MenuScreen(), // Using the MenuScreen widget
+          child: MenuScreen(),
         );
       },
     );
   }
 
-  // Existing functions for other popups...
   void _showAddRestaurantPopup(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -227,7 +225,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               backgroundColor: Colors.brown,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             ),
-            onPressed: () => _showMenuPopup(context), // Updated menu button
+            onPressed: () => _showMenuPopup(context),
             child: const Text('Menu', style: TextStyle(color: Colors.white)),
           ),
           const SizedBox(height: 20),
@@ -313,6 +311,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       showUnselectedLabels: false,
       currentIndex: currentIndex,
       onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
@@ -331,27 +332,27 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         }
       },
       items: [
-        _buildBottomNavigationBarItem(Icons.home, 0, currentIndex),
-        _buildBottomNavigationBarItem(Icons.search, 1, currentIndex),
-        _buildBottomNavigationBarItem(Icons.restaurant_menu, 2, currentIndex),
-        _buildBottomNavigationBarItem(Icons.phone, 3, currentIndex),
-        _buildBottomNavigationBarItem(Icons.person, 4, currentIndex),
+        _buildNavItem(Icons.home, 0),
+        _buildNavItem(Icons.search, 1),
+        _buildNavItem(Icons.restaurant_menu, 2),
+        _buildNavItem(Icons.phone, 3),
+        _buildNavItem(Icons.person, 4),
       ],
     );
   }
 
-  BottomNavigationBarItem _buildBottomNavigationBarItem(
-      IconData icon, int index, int currentIndex) {
+  BottomNavigationBarItem _buildNavItem(IconData icon, int index) {
+    final isSelected = _currentIndex == index;
     return BottomNavigationBarItem(
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: currentIndex == index ? Colors.brown[700] : Colors.transparent,
+          color: isSelected ? Colors.brown[700] : Colors.brown[100],
         ),
         child: Icon(
           icon,
-          color: currentIndex == index ? Colors.white : Colors.brown[700],
+          color: isSelected ? Colors.white : Colors.brown[700],
         ),
       ),
       label: "",

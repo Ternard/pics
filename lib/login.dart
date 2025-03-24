@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,20 +11,17 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _isLoading = false;
-  bool _obscurePassword = true;
-  final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<void> _login(BuildContext context) async {
     if (_isLoading) return;
 
     final email = emailController.text.trim();
-    final password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        const SnackBar(content: Text('Please enter your email')),
       );
       return;
     }
@@ -34,64 +31,32 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // 1. Authenticate with Supabase Auth
-      final authResponse = await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+      final emailExists = await _authService.checkEmailExists(email);
 
-      if (authResponse.user != null) {
-        // 2. Check if user exists in users table
-        final userData = await _supabase
-            .from('users')
-            .select()
-            .eq('email', email)
-            .maybeSingle();
-
-        if (userData == null) {
-          // If user doesn't exist in users table (shouldn't happen for logged in users)
-          await _supabase.from('users').insert({
-            'user.id': authResponse.user!.id,
-            'email': email,
-          });
-        }
-
-        // 3. Record login time
-        await _supabase.from('user_logins').insert({
-          'user.id': authResponse.user!.id,
-          'login_time': DateTime.now().toIso8601String(),
-        });
-
+      if (emailExists) {
+        await _authService.setLoggedIn(true);
         if (mounted) {
-          // 4. Show welcome message
-          _showWelcomeDialog(context, email);
-
-          // 5. Navigate to home after dialog is dismissed
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/home',
                 (route) => false,
           );
         }
-      }
-    } on AuthException catch (e) {
-      String errorMessage = e.message;
-      if (e.statusCode == '400') {
-        errorMessage = "Invalid email or password";
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
-        );
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No account found with this email'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login failed: ${e.toString()}'),
+            content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -103,44 +68,6 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     }
-  }
-
-  void _showWelcomeDialog(BuildContext context, String email) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFFF5E1BE),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: Text(
-            "Welcome Back!",
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.bold,
-              color: Colors.brown[800],
-            ),
-          ),
-          content: Text(
-            "You're logged in as $email",
-            style: GoogleFonts.poppins(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Continue",
-                style: GoogleFonts.poppins(
-                  color: Colors.brown[700],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -158,10 +85,10 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 20,
-                      child: Icon(Icons.restaurant_menu, color: Colors.brown),
+                    Image.asset(
+                      'assets/logo.png',
+                      height: 40,
+                      width: 40,
                     ),
                     const SizedBox(width: 10),
                     Text(
@@ -203,40 +130,6 @@ class _LoginPageState extends State<LoginPage> {
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 15,
                       horizontal: 20,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
-
-                // Password Input Field
-                TextField(
-                  controller: passwordController,
-                  obscureText: _obscurePassword,
-                  enabled: !_isLoading,
-                  decoration: InputDecoration(
-                    hintText: "Password",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 20,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Colors.brown,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
                     ),
                   ),
                 ),

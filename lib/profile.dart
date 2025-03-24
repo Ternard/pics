@@ -17,9 +17,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService authService = AuthService();
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
-  String _email = "user@example.com"; // This will be loaded from auth service
+  String _email = "user@example.com";
   String _phoneNumber = "+254 708 756 456";
   bool _notificationsEnabled = true;
+  int _currentIndex = 4;
 
   Future<void> _launchWebsite() async {
     final Uri url = Uri.parse('https://www.mealmeter.com');
@@ -69,7 +70,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _updatePhoneNumber() async {
-    final TextEditingController phoneController = TextEditingController(text: _phoneNumber);
+    final TextEditingController phoneController =
+    TextEditingController(text: _phoneNumber);
     final newPhone = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -78,7 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           controller: phoneController,
           decoration: const InputDecoration(labelText: 'Phone Number'),
           keyboardType: TextInputType.phone,
-          onChanged: (value) => _phoneNumber = value,
         ),
         actions: [
           TextButton(
@@ -104,17 +105,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _toggleNotifications(bool value) async {
-    if (!mounted) return;
-
-    setState(() {
-      _notificationsEnabled = value;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
+    if (mounted) {
+      setState(() {
+        _notificationsEnabled = value;
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -122,10 +117,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // final user = await authService.getCurrentUser();
     // if (mounted) {
     //   setState(() {
-    //     _email = user.email;
-    //     _phoneNumber = user.phoneNumber ?? '+254 708 756 456';
+    //     _email = user.email ?? "user@example.com";
     //   });
     // }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
   }
 
   @override
@@ -159,51 +159,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 20),
-          GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.photo_library),
-                        title: const Text('Choose from gallery'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _pickImage();
-                        },
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.photo_library),
+                            title: const Text('Choose from gallery'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _pickImage();
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.camera_alt),
+                            title: const Text('Take a photo'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _takePhoto();
+                            },
+                          ),
+                        ],
                       ),
-                      ListTile(
-                        leading: const Icon(Icons.camera_alt),
-                        title: const Text('Take a photo'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _takePhoto();
-                        },
-                      ),
-                    ],
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.brown[300],
+                  backgroundImage: _imageFile != null
+                      ? FileImage(File(_imageFile!.path))
+                      : null,
+                  child: _imageFile == null
+                      ? const Text(
+                    "ID",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  )
+                      : null,
+                ),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.brown[700],
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    color: Colors.white,
+                    size: 16,
                   ),
                 ),
-              );
-            },
-            child: CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.brown[300],
-              backgroundImage: _imageFile != null
-                  ? FileImage(File(_imageFile!.path))
-                  : null,
-              child: _imageFile == null
-                  ? const Text(
-                "ID",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-              )
-                  : null,
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
-          // Changed ProfileField for email to be non-editable
           Container(
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
             padding: const EdgeInsets.all(15),
@@ -238,17 +262,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
                 },
               ),
-              Text("Notifications", style: TextStyle(fontSize: 16, color: Colors.brown[700])),
+              Text(
+                "Notifications",
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.brown[700]
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           TextButton.icon(
             onPressed: () async {
               try {
-                await authService.logout();
-                if (mounted) {
-                  Navigator.pushReplacementNamed(context, '/');
-                }
+                await authService.logout(context);
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -258,7 +285,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             icon: Icon(Icons.logout, color: Colors.brown[700]),
-            label: Text("Log Out", style: TextStyle(fontSize: 18, color: Colors.brown[700])),
+            label: Text(
+              "Log Out",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.brown[700]
+              ),
+            ),
           ),
           const SizedBox(height: 30),
           Padding(
@@ -270,12 +303,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SettingsPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const SettingsPage()
+                      ),
                     );
                   },
                   child: Text(
-                      "App Settings",
-                      style: TextStyle(fontSize: 16, color: Colors.brown[700])
+                    "App Settings",
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.brown[700]
+                    ),
                   ),
                 ),
                 GestureDetector(
@@ -300,8 +338,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         unselectedItemColor: Colors.brown[400],
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: 4,
+        currentIndex: _currentIndex,
         onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
@@ -319,47 +360,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
               break;
           }
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: _BottomNavIcon(icon: Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: _BottomNavIcon(icon: Icons.search),
-            label: "Search",
-          ),
-          BottomNavigationBarItem(
-            icon: _BottomNavIcon(icon: Icons.restaurant_menu),
-            label: "Menu",
-          ),
-          BottomNavigationBarItem(
-            icon: _BottomNavIcon(icon: Icons.phone),
-            label: "Call",
-          ),
-          BottomNavigationBarItem(
-            icon: _BottomNavIcon(icon: Icons.person),
-            label: "Profile",
-          ),
+        items: [
+          _buildNavItem(Icons.home, 0),
+          _buildNavItem(Icons.search, 1),
+          _buildNavItem(Icons.restaurant_menu, 2),
+          _buildNavItem(Icons.phone, 3),
+          _buildNavItem(Icons.person, 4),
         ],
       ),
     );
   }
-}
 
-class _BottomNavIcon extends StatelessWidget {
-  final IconData icon;
-
-  const _BottomNavIcon({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.brown[100],
+  BottomNavigationBarItem _buildNavItem(IconData icon, int index) {
+    final isSelected = _currentIndex == index;
+    return BottomNavigationBarItem(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isSelected ? Colors.brown[700] : Colors.brown[100],
+        ),
+        child: Icon(
+          icon,
+          color: isSelected ? Colors.white : Colors.brown[700],
+        ),
       ),
-      child: Icon(icon, color: Colors.brown[700]),
+      label: '',
     );
   }
 }

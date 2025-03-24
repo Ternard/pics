@@ -121,10 +121,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 20,
-                      child: Icon(Icons.restaurant_menu, color: Colors.brown),
+                    Image.asset(
+                      'assets/logo.png',
+                      height: 40,
+                      width: 40,
                     ),
                     const SizedBox(width: 10),
                     Text(
@@ -163,7 +163,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -181,7 +184,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: 20,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -203,7 +209,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _isLoading ? Colors.brown[400] : Colors.brown[700],
+                      backgroundColor: _isLoading
+                          ? Colors.brown[400]
+                          : Colors.brown[700],
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
