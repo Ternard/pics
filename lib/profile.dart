@@ -1,9 +1,8 @@
-import 'dart:io'; // Added this import for File class
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'auth_service.dart';
 import 'settings.dart';
 
@@ -18,15 +17,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService authService = AuthService();
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
-  String _email = "user@example.com";
+  String _email = "user@example.com"; // This will be loaded from auth service
   String _phoneNumber = "+254 708 756 456";
   bool _notificationsEnabled = true;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> _launchWebsite() async {
-    final Uri url = Uri.parse('https://www.mealmeter.com'); // Fixed URL parsing
-    if (await canLaunchUrl(url)) { // Changed to canLaunchUrl
-      await launchUrl(url); // Changed to launchUrl
+    final Uri url = Uri.parse('https://www.mealmeter.com');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,47 +63,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to take photo: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _updateEmail() async {
-    final TextEditingController emailController = TextEditingController(text: _email);
-    final newEmail = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Update Email'),
-        content: TextField(
-          controller: emailController,
-          decoration: const InputDecoration(labelText: 'New Email'),
-          onChanged: (value) => _email = value,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, emailController.text),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-
-    if (newEmail != null && newEmail.isNotEmpty && mounted) {
-      try {
-        await authService.updateEmail(newEmail);
-        setState(() {
-          _email = newEmail;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email updated successfully')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update email: $e')),
         );
       }
     }
@@ -152,67 +109,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _notificationsEnabled = value;
     });
-
-    try {
-      if (value) {
-        await _firebaseMessaging.requestPermission();
-        await _firebaseMessaging.subscribeToTopic('all_users');
-      } else {
-        await _firebaseMessaging.unsubscribeFromTopic('all_users');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update notifications: $e')),
-        );
-      }
-    }
   }
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
-    _setupNotifications();
   }
 
   Future<void> _loadUserData() async {
-    // Implementation remains the same
-  }
-
-  Future<void> _setupNotifications() async {
-    try {
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-
-      if (mounted && settings.authorizationStatus == AuthorizationStatus.authorized) {
-        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-          if (!mounted) return;
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(message.notification?.title ?? 'Notification'),
-              content: Text(message.notification?.body ?? ''),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Notification setup failed: $e')),
-        );
-      }
-    }
+    // Load actual user data from your auth service
+    // final user = await authService.getCurrentUser();
+    // if (mounted) {
+    //   setState(() {
+    //     _email = user.email;
+    //     _phoneNumber = user.phoneNumber ?? '+254 708 756 456';
+    //   });
+    // }
   }
 
   @override
@@ -290,9 +203,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          ProfileField(
-            text: _email,
-            onTap: _updateEmail,
+          // Changed ProfileField for email to be non-editable
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
+            padding: const EdgeInsets.all(15),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEED9B5),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Text(
+              _email,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown[800],
+              ),
+            ),
           ),
           ProfileField(
             text: _phoneNumber,
@@ -391,7 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               break;
           }
         },
-        items: const [ // Made items const
+        items: const [
           BottomNavigationBarItem(
             icon: _BottomNavIcon(icon: Icons.home),
             label: "Home",
