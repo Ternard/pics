@@ -1,137 +1,96 @@
 import 'package:flutter/material.dart';
 
-class NewRestaurantScreen extends StatefulWidget {
-  final Function(bool) onSubmit;
-
-  const NewRestaurantScreen({super.key, required this.onSubmit});
-
-  @override
-  _NewRestaurantScreenState createState() => _NewRestaurantScreenState();
-}
-
-class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  final List<Map<String, String>> _menuItems = [];
-
-  void _addMenuItem() {
-    setState(() {
-      _menuItems.add({"item": "", "price": ""});
-    });
-  }
-
-  void _submit() {
-    // Simulate submission logic
-    bool success = true; // Replace with actual submission logic
-    widget.onSubmit(success); // Notify the parent about the submission result
-  }
+class MenuScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> menuItems = [
+    {'name': 'Shawarma Plate', 'price': '850 Ksh'},
+    {'name': 'Beef Burger', 'price': '650 Ksh'},
+    {'name': 'Chicken Wings', 'price': '750 Ksh'},
+    {'name': 'French Fries', 'price': '350 Ksh'},
+    {'name': 'Vegetable Salad', 'price': '450 Ksh'},
+    {'name': 'Soft Drinks', 'price': '150 Ksh'},
+    {'name': 'Mineral Water', 'price': '100 Ksh'},
+    {'name': 'Fruit Juice', 'price': '250 Ksh'},
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           // Header
-          Text(
-            "Add New Restaurant",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.brown,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Name Field
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              labelText: "Name",
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          // Location Field
-          TextField(
-            controller: _locationController,
-            decoration: InputDecoration(
-              labelText: "Location URL",
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Menu Section
-          Text(
-            "Menu",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.brown,
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          // Editable Menu Items
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: _menuItems.length,
-            itemBuilder: (context, index) {
-              return Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: "Item",
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        _menuItems[index]["item"] = value;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: "Price",
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) {
-                        _menuItems[index]["price"] = value;
-                      },
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-
-          // Add Menu Item Button
-          ElevatedButton(
-            onPressed: _addMenuItem,
-            child: Text("Add Menu Item"),
-          ),
-          const SizedBox(height: 20),
-
-          // Submit Button
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.brown,
-              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Restaurant Menu',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[700],
+                ),
               ),
-            ),
-            onPressed: _submit,
-            child: Text("Submit", style: TextStyle(color: Colors.white)),
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.brown),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
           ),
+          const Divider(color: Colors.brown, thickness: 1),
+          const SizedBox(height: 10),
+
+          // Menu Items List
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: menuItems.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          menuItems[index]['name'],
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.brown[800],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.brown[50],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          menuItems[index]['price'],
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.brown[700],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
