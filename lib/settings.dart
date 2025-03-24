@@ -1,4 +1,3 @@
-// settings_page.dart
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -22,7 +21,7 @@ class SettingsPage extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.brown[700]),
           onPressed: () {
-            Navigator.pop(context); // Go back to the previous screen
+            Navigator.pop(context); // Go back to the ProfileScreen
           },
         ),
       ),
@@ -52,6 +51,7 @@ class SettingsPage extends StatelessWidget {
           color: Colors.brown[700],
         ),
       ),
+      trailing: Icon(Icons.arrow_forward_ios, color: Colors.brown[400], size: 16),
       onTap: () {
         // Handle navigation or action for each setting option
         switch (title) {

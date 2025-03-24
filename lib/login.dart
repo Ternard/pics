@@ -1,49 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'auth_service.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
-  Future<void> _login(BuildContext context, String email, String password) async {
-    try {
-      final response = await Supabase.instance.client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
 
-      if (response.user != null) {
-        // Track the login in Supabase
-        await Supabase.instance.client
-            .from('user_logins')
-            .insert({
-          'user_id': response.user!.id,
-          'email': email,
-          'login_time': DateTime.now().toIso8601String(),
-        })
-            ._execute();
-
-        // Navigate to the home screen
-        Navigator.pushNamed(context, '/home');
-      }
-    } catch (e) {
-      // Handle login error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
-    }
-  }
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-
     return Scaffold(
-      backgroundColor: Color(0xFFF5E1BE), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE), // Beige background
       body: Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -56,7 +35,7 @@ class LoginPage extends StatelessWidget {
                     radius: 20,
                     child: Icon(Icons.restaurant_menu, color: Colors.brown),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
                     "MealMeter",
                     style: GoogleFonts.playfairDisplay(
@@ -67,7 +46,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
 
               // Login Title
               Text(
@@ -78,24 +57,23 @@ class LoginPage extends StatelessWidget {
                   color: Colors.brown[800],
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               // Email Input Field
-              _buildTextField("Email", controller: emailController),
-              SizedBox(height: 15),
+              _buildTextField("Email", controller: _emailController),
+              const SizedBox(height: 15),
 
               // Password Input Field
-              _buildTextField("Password", controller: passwordController, obscureText: true),
-              SizedBox(height: 20),
+              _buildTextField("Password", obscureText: true, controller: _passwordController),
+              const SizedBox(height: 20),
 
               // Sign Up Text
               GestureDetector(
                 onTap: () {
-                  // Navigate to the SignUpScreen
                   Navigator.pushNamed(context, '/signup');
                 },
                 child: Text(
-                  "Don’t have an account? Sign Up",
+                  "Don't have an account? Sign Up",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Colors.brown[700],
@@ -103,7 +81,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               // Login Button
               SizedBox(
@@ -116,10 +94,39 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: () {
-                    _login(context, emailController.text, passwordController.text);
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                    setState(() => _isLoading = true);
+                    try {
+                      await _authService.login(
+                        _emailController.text,
+                        _passwordController.text,
+                      );
+                      if (mounted) {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      }
+                    } on AuthException catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.message)),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Login failed')),
+                        );
+                      }
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isLoading = false);
+                      }
+                    }
                   },
-                  child: Text(
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
                     "Log In",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
@@ -136,8 +143,8 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  // Custom Input Field Widget
-  Widget _buildTextField(String hintText, {bool obscureText = false, TextEditingController? controller}) {
+  Widget _buildTextField(String hintText,
+      {bool obscureText = false, TextEditingController? controller}) {
     return TextField(
       controller: controller,
       obscureText: obscureText,
@@ -149,12 +156,8 @@ class LoginPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
         ),
-        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
       ),
     );
   }
-}
-
-extension on PostgrestFilterBuilder {
-  _execute() {}
 }

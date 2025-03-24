@@ -1,29 +1,25 @@
-// main.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
-import 'contact_us.dart'; // Import the ContactUsScreen
-import 'home.dart'; // Import the HomeScreen
-import 'login.dart'; // Import the LoginPage
-import 'meals.dart'; // Import the MealScreen
-import 'profile.dart'; // Import the ProfileScreen
-import 'restaurants.dart'; // Import the RestaurantScreen
-import 'search.dart'; // Import the SearchScreen
-import 'sign_up.dart'; // Import the SignUpScreen
-import 'settings.dart'; // Import the SettingsPage
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'auth_service.dart';
+import 'contact_us.dart';
+import 'home.dart';
+import 'login.dart';
+import 'meals.dart';
+import 'profile.dart';
+import 'restaurants.dart';
+import 'search.dart';
+import 'sign_up.dart';
 
 void main() async {
-  // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
   await Supabase.initialize(
-    url: 'https://pokfgifldgnorifrmetp.supabase.co', // Replace with your Supabase URL
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBva2ZnaWZsZGdub3JpZnJtZXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNzA1NTYsImV4cCI6MjA1Nzk0NjU1Nn0.DcQuWYaEw9DqjCer7PENJG9hMEYTMr-KOui4ia23WQQ', // Replace with your Supabase anon key
+    url: 'https://pokfgifldgnorifrmetp.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBva2ZnaWZsZGdub3JpZnJtZXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNzA1NTYsImV4cCI6MjA1Nzk0NjU1Nn0.DcQuWYaEw9DqjCer7PENJG9hMEYTMr-KOui4ia23WQQ',
   );
 
-  // Run the app
-  runApp(MealMeterApp());
+  runApp(const MealMeterApp());
 }
 
 class MealMeterApp extends StatelessWidget {
@@ -33,18 +29,31 @@ class MealMeterApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/', // Set the initial route to the splash screen
+      home: FutureBuilder<bool>(
+        future: AuthService().isLoggedIn(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (snapshot.hasError) {
+            return const Scaffold(
+              body: Center(child: Text('Error checking login status')),
+            );
+          }
+          return snapshot.data == true ? HomeScreen() : const SplashScreen();
+        },
+      ),
       routes: {
-        '/': (context) => SplashScreen(), // SplashScreen
-        '/meals': (context) => MealScreen(), // MealScreen
-        '/signup': (context) => SignUpScreen(), // SignUpScreen
-        '/login': (context) => LoginPage(), // LoginPage
-        '/home': (context) => HomeScreen(), // HomeScreen
-        '/profile': (context) => ProfileScreen(), // ProfileScreen
-        '/restaurant': (context) => RestaurantScreen(), // RestaurantScreen
-        '/search': (context) => SearchScreen(), // SearchScreen
-        '/contact': (context) => ContactUsScreen(), // ContactUsScreen
-        '/settings': (context) => SettingsPage(), // SettingsPage
+        '/meals': (context) => const MealScreen(),
+        '/signup': (context) => const SignUpScreen(),
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => HomeScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/restaurant': (context) => const RestaurantScreen(),
+        '/search': (context) => const SearchScreen(),
+        '/contact': (context) => ContactUsScreen(),
       },
     );
   }
@@ -56,24 +65,24 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5E1BE), // Beige background
+      backgroundColor: const Color(0xFFF5E1BE),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo Image
             Image.asset(
-              'assets/logo.png', // Replace with your logo asset
+              'assets/logo.png',
               width: 120,
               height: 120,
             ),
             const SizedBox(height: 20),
-
-            // Get Started Button
             ElevatedButton(
-              onPressed: () {
-                // Navigate to the SignUpScreen
-                Navigator.pushNamed(context, '/signup');
+              onPressed: () async {
+                final isLoggedIn = await AuthService().isLoggedIn();
+                Navigator.pushReplacementNamed(
+                  context,
+                  isLoggedIn ? '/home' : '/signup',
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.brown[700],
