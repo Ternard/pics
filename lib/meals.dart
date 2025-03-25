@@ -11,56 +11,52 @@ class MealScreen extends StatefulWidget {
 }
 
 class _MealScreenState extends State<MealScreen> {
+  final SupabaseClient supabase = Supabase.instance.client;
   int _currentIndex = 2;
   final PageController _pageController = PageController();
-  final SupabaseClient supabase = Supabase.instance.client;
-  List<String> mealImageUrls = [];
-  bool isLoading = true;
-  String? errorMessage;
+  List<Map<String, dynamic>> _meals = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchMealImages();
+    _fetchMeals();
   }
 
-  Future<void> _fetchMealImages() async {
+  Future<void> _fetchMeals() async {
     try {
-      // First verify bucket exists and is accessible
-      final bucketResponse = await supabase.storage.from('restaurant').list();
+      // Fetch meal data from your 'meals' table
+      final mealsData = await supabase.from('meals').select('*');
 
-      // Then list files in the images folder
-      final response = await supabase.storage
-          .from('restaurant')
-          .list(path: 'images');
-
-      if (response != null && response.isNotEmpty) {
-        final List<String> urls = [];
-        for (var file in response) {
-          if (file.name != '.emptyFolderPlaceholder') {
-            final url = supabase.storage
-                .from('restaurant')
-                .getPublicUrl('images/${file.name}');
-            urls.add(url);
-          }
+      // Get image URLs for each meal
+      final mealsWithImages = await Future.wait(mealsData.map((meal) async {
+        if (meal['image_path'] != null) {
+          final imageUrl = supabase.storage
+              .from('meals')
+              .createSignedUrl(meal['image_path'], 3600); // 1 hour expiry
+          return {
+            ...meal,
+            'image_url': await imageUrl,
+          };
         }
+        return meal;
+      }));
 
+      if (mounted) {
         setState(() {
-          mealImageUrls = urls;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          errorMessage = 'No images found in storage';
-          isLoading = false;
+          _meals = List<Map<String, dynamic>>.from(mealsWithImages);
+          _isLoading = false;
         });
       }
     } catch (e) {
-      debugPrint('Error fetching images: $e');
-      setState(() {
-        errorMessage = 'Failed to load images';
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading meals: $e')),
+        );
+      }
     }
   }
 
@@ -82,12 +78,16 @@ class _MealScreenState extends State<MealScreen> {
             child: NewMealScreen(
               onSubmit: (bool success) {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(success ? "Meal Added" : "Error"),
-                  ),
-                );
-                if (success) _fetchMealImages(); // Refresh images after adding
+                if (success) {
+                  _fetchMeals(); // Refresh the list after adding new meal
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Meal Added")),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Error adding meal")),
+                  );
+                }
               },
             ),
           ),
@@ -115,9 +115,7 @@ class _MealScreenState extends State<MealScreen> {
               onSubmit: (bool success) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(success ? "Review Added" : "Error"),
-                  ),
+                  SnackBar(content: Text(success ? "Review Added" : "Error")),
                 );
               },
             ),
@@ -137,7 +135,14 @@ class _MealScreenState extends State<MealScreen> {
             Expanded(
               child: Stack(
                 children: [
-                  _buildMealPage(),
+                  PageView(
+                    controller: _pageController,
+                    children: _isLoading
+                        ? [const Center(child: CircularProgressIndicator())]
+                        : _meals.isEmpty
+                        ? [const Center(child: Text('No meals available'))]
+                        : _meals.map((meal) => _buildMealPage(meal)).toList(),
+                  ),
                   Positioned(
                     left: 10,
                     top: MediaQuery.of(context).size.height / 2 - 20,
@@ -191,171 +196,107 @@ class _MealScreenState extends State<MealScreen> {
     );
   }
 
-  Widget _buildMealPage() {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 50, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              errorMessage!,
-              style: const TextStyle(fontSize: 16, color: Colors.red),
-            ),
-            TextButton(
-              onPressed: _fetchMealImages,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return PageView.builder(
-      controller: _pageController,
-      itemCount: mealImageUrls.isEmpty ? 1 : mealImageUrls.length,
-      itemBuilder: (context, index) {
-        final imageUrl = mealImageUrls.isEmpty
-            ? 'https://via.placeholder.com/400x200?text=No+Images+Found'
-            : mealImageUrls[index % mealImageUrls.length];
-
-        return SingleChildScrollView(
-          child: Column(
+  Widget _buildMealPage(Map<String, dynamic> meal) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Stack(
             children: [
-              Stack(
-                children: [
-                  ClipPath(
-                    clipper: CurvedClipper(),
-                    child: Image.network(
-                      imageUrl,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (BuildContext context, Widget child,
-                          ImageChunkEvent? loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: Colors.grey[200],
+              ClipPath(
+                clipper: CurvedClipper(),
+                child: meal['image_url'] != null
+                    ? Image.network(
+                  meal['image_url'],
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Container(
                         height: 200,
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.broken_image, size: 50),
-                            Text('Failed to load image'),
-                          ],
-                        ),
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.fastfood, size: 50),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () {},
-                  child: const Text(
-                    'Add to plate',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                )
+                    : Container(
+                  height: 200,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.fastfood, size: 50),
                 ),
               ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, color: Colors.brown),
-                            const SizedBox(width: 5),
-                            Text('Location', style: TextStyle(color: Colors.brown)),
-                          ],
-                        ),
-                        Text('1500 Ksh', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Steak Plate',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Meal Description',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'A perfectly seared steak, cooked to your desired doneness, served with a side of creamy mashed potatoes, sautéed greens, and a rich, velvety sauce.',
-                      style: TextStyle(color: Colors.black54),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Customer Reviews',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 180,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildReviewCard(
-                                'Brandon White', '4.2', 'Best Customer Service I\'ve ever had...'),
-                            const SizedBox(width: 10),
-                            _buildReviewCard('Victoria Malen', '',
-                                'The meals are so flavorful & aesthetic...'),
-                            const SizedBox(width: 10),
-                            _buildReviewCard(
-                                'John Doe', '4.8', 'Amazing food and great service!'),
-                            const SizedBox(width: 10),
-                            _buildReviewCard(
-                                'Jane Smith', '4.5', 'Highly recommend this place!'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
             ],
           ),
-        );
-      },
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.brown,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {},
+              child: const Text('Add to plate', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, color: Colors.brown),
+                        const SizedBox(width: 5),
+                        Text(meal['location'] ?? 'Location',
+                            style: TextStyle(color: Colors.brown)),
+                      ],
+                    ),
+                    Text('${meal['price'] ?? '0'} Ksh',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(meal['name'] ?? 'Meal Name',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 5),
+                Text('Meal Description',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 5),
+                Text(
+                  meal['description'] ?? 'No description available',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                const SizedBox(height: 20),
+                Text('Customer Reviews',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 180,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildReviewCard('Brandon White', '4.2', 'Best Customer Service I\'ve ever had...'),
+                        const SizedBox(width: 10),
+                        _buildReviewCard('Victoria Malen', '', 'The meals are so flavorful & aesthetic...'),
+                        const SizedBox(width: 10),
+                        _buildReviewCard('John Doe', '4.8', 'Amazing food and great service!'),
+                        const SizedBox(width: 10),
+                        _buildReviewCard('Jane Smith', '4.5', 'Highly recommend this place!'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
@@ -404,6 +345,9 @@ class _MealScreenState extends State<MealScreen> {
       showUnselectedLabels: false,
       currentIndex: currentIndex,
       onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
