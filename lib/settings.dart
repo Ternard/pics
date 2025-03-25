@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -14,6 +15,9 @@ class _SettingsPageState extends State<SettingsPage> {
   String _phoneNumber = '';
   String _dob = '';
   String _selectedLanguage = 'English';
+  bool _cameraPermission = false;
+  bool _microphonePermission = false;
+  bool _locationPermission = false;
 
   final List<String> _languages = [
     'English',
@@ -28,13 +32,27 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _loadUserData();
+    _checkPermissions();
+  }
+
+  Future<void> _checkPermissions() async {
+    final cameraStatus = await Permission.camera.status;
+    final microphoneStatus = await Permission.microphone.status;
+    final locationStatus = await Permission.location.status;
+
+    if (mounted) {
+      setState(() {
+        _cameraPermission = cameraStatus.isGranted;
+        _microphonePermission = microphoneStatus.isGranted;
+        _locationPermission = locationStatus.isGranted;
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
     try {
       final user = supabase.auth.currentUser;
       if (user != null) {
-        // Fetch additional user data from your profiles table
         final data = await supabase
             .from('profiles')
             .select()
@@ -52,7 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading user data: $e')),
+          const SnackBar(content: Text('Error loading user data')),
         );
       }
     }
@@ -85,7 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _buildPrivacySettings(context),
           _buildAvatarSettings(context),
           _buildNotificationSettings(context),
-          _buildStorageSettings(context),
+          _buildDevicePermissions(context),
           _buildLanguageSettings(context),
           _buildUpdateSettings(context),
         ],
@@ -106,7 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       children: [
         ListTile(
-          title: Text("Full Name"),
+          title: const Text("Full Name"),
           subtitle: Text(_fullName.isNotEmpty ? _fullName : "Not set"),
           trailing: Icon(Icons.edit, color: Colors.brown[400]),
           onTap: () => _showEditDialog("Full Name", _fullName, (value) {
@@ -115,7 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
           }),
         ),
         ListTile(
-          title: Text("Phone Number"),
+          title: const Text("Phone Number"),
           subtitle: Text(_phoneNumber.isNotEmpty ? _phoneNumber : "Not set"),
           trailing: Icon(Icons.edit, color: Colors.brown[400]),
           onTap: () => _showEditDialog("Phone Number", _phoneNumber, (value) {
@@ -124,7 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
           }),
         ),
         ListTile(
-          title: Text("Date of Birth"),
+          title: const Text("Date of Birth"),
           subtitle: Text(_dob.isNotEmpty ? _dob : "Not set"),
           trailing: Icon(Icons.edit, color: Colors.brown[400]),
           onTap: () => _showDatePicker(context),
@@ -146,12 +164,12 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       children: [
         ListTile(
-          title: Text("Change Password"),
+          title: const Text("Change Password"),
           trailing: Icon(Icons.arrow_forward_ios, color: Colors.brown[400], size: 16),
           onTap: () => _showChangePasswordDialog(context),
         ),
         ListTile(
-          title: Text("Two-Factor Authentication"),
+          title: const Text("Two-Factor Authentication"),
           trailing: Switch(
             value: false,
             onChanged: (value) {},
@@ -180,7 +198,7 @@ class _SettingsPageState extends State<SettingsPage> {
               CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.brown[300],
-                child: Icon(Icons.person, size: 50, color: Colors.white),
+                child: const Icon(Icons.person, size: 50, color: Colors.white),
               ),
               const SizedBox(height: 10),
               ElevatedButton(
@@ -188,9 +206,55 @@ class _SettingsPageState extends State<SettingsPage> {
                   backgroundColor: Colors.brown,
                 ),
                 onPressed: () => _showAvatarOptions(context),
-                child: Text("Change Avatar", style: TextStyle(color: Colors.white)),
+                child: const Text("Change Avatar", style: TextStyle(color: Colors.white)),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDevicePermissions(BuildContext context) {
+    return ExpansionTile(
+      leading: Icon(Icons.perm_device_info, color: Colors.brown[700]),
+      title: Text(
+        "Device Permissions",
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.brown[700],
+        ),
+      ),
+      children: [
+        ListTile(
+          leading: Icon(Icons.camera_alt, color: Colors.brown[700]),
+          title: const Text("Camera Access"),
+          subtitle: const Text("Required for taking photos"),
+          trailing: Switch(
+            value: _cameraPermission,
+            onChanged: (value) => _requestPermission(Permission.camera, value),
+            activeColor: Colors.brown,
+          ),
+        ),
+        ListTile(
+          leading: Icon(Icons.mic, color: Colors.brown[700]),
+          title: const Text("Microphone Access"),
+          subtitle: const Text("Required for voice recordings"),
+          trailing: Switch(
+            value: _microphonePermission,
+            onChanged: (value) => _requestPermission(Permission.microphone, value),
+            activeColor: Colors.brown,
+          ),
+        ),
+        ListTile(
+          leading: Icon(Icons.location_on, color: Colors.brown[700]),
+          title: const Text("Location Access"),
+          subtitle: const Text("Required for location-based features"),
+          trailing: Switch(
+            value: _locationPermission,
+            onChanged: (value) => _requestPermission(Permission.location, value),
+            activeColor: Colors.brown,
           ),
         ),
       ],
@@ -222,28 +286,11 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // Keep existing methods for other settings (notifications, storage, updates)
   Widget _buildNotificationSettings(BuildContext context) {
     return ListTile(
       leading: Icon(Icons.notifications, color: Colors.brown[700]),
       title: Text(
         "Notifications",
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.brown[700],
-        ),
-      ),
-      trailing: Icon(Icons.arrow_forward_ios, color: Colors.brown[400], size: 16),
-      onTap: () {},
-    );
-  }
-
-  Widget _buildStorageSettings(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.storage, color: Colors.brown[700]),
-      title: Text(
-        "Storage and Data",
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -285,14 +332,14 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel", style: TextStyle(color: Colors.brown)),
+            child: const Text("Cancel", style: TextStyle(color: Colors.brown)),
           ),
           TextButton(
             onPressed: () {
               onSave(controller.text);
               Navigator.pop(context);
             },
-            child: Text("Save", style: TextStyle(color: Colors.brown)),
+            child: const Text("Save", style: TextStyle(color: Colors.brown)),
           ),
         ],
       ),
@@ -330,37 +377,37 @@ class _SettingsPageState extends State<SettingsPage> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Change Password"),
+        title: const Text("Change Password"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: oldPasswordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: "Current Password"),
+              decoration: const InputDecoration(labelText: "Current Password"),
             ),
             TextField(
               controller: newPasswordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: "New Password"),
+              decoration: const InputDecoration(labelText: "New Password"),
             ),
             TextField(
               controller: confirmPasswordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: "Confirm New Password"),
+              decoration: const InputDecoration(labelText: "Confirm New Password"),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel", style: TextStyle(color: Colors.brown)),
+            child: const Text("Cancel", style: TextStyle(color: Colors.brown)),
           ),
           TextButton(
             onPressed: () async {
               if (newPasswordController.text != confirmPasswordController.text) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Passwords don't match")),
+                  const SnackBar(content: Text("Passwords don't match")),
                 );
                 return;
               }
@@ -371,7 +418,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 if (mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Password updated successfully")),
+                    const SnackBar(content: Text("Password updated successfully")),
                   );
                 }
               } catch (e) {
@@ -382,7 +429,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 }
               }
             },
-            child: Text("Update", style: TextStyle(color: Colors.brown)),
+            child: const Text("Update", style: TextStyle(color: Colors.brown)),
           ),
         ],
       ),
@@ -396,24 +443,24 @@ class _SettingsPageState extends State<SettingsPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            leading: Icon(Icons.photo_library),
-            title: Text("Choose from Gallery"),
+            leading: const Icon(Icons.photo_library),
+            title: const Text("Choose from Gallery"),
             onTap: () {
               Navigator.pop(context);
               // Implement gallery picker
             },
           ),
           ListTile(
-            leading: Icon(Icons.camera_alt),
-            title: Text("Take a Photo"),
+            leading: const Icon(Icons.camera_alt),
+            title: const Text("Take a Photo"),
             onTap: () {
               Navigator.pop(context);
               // Implement camera
             },
           ),
           ListTile(
-            leading: Icon(Icons.face),
-            title: Text("Choose Default Avatar"),
+            leading: const Icon(Icons.face),
+            title: const Text("Choose Default Avatar"),
             onTap: () {
               Navigator.pop(context);
               // Implement default avatar selector
@@ -422,6 +469,57 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _requestPermission(Permission permission, bool enable) async {
+    if (enable) {
+      final status = await permission.request();
+      if (mounted) {
+        setState(() {
+          switch (permission) {
+            case Permission.camera:
+              _cameraPermission = status.isGranted;
+              break;
+            case Permission.microphone:
+              _microphonePermission = status.isGranted;
+              break;
+            case Permission.location:
+              _locationPermission = status.isGranted;
+              break;
+            default:
+              break;
+          }
+        });
+
+        if (!status.isGranted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Permission denied")),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          switch (permission) {
+            case Permission.camera:
+              _cameraPermission = false;
+              break;
+            case Permission.microphone:
+              _microphonePermission = false;
+              break;
+            case Permission.location:
+              _locationPermission = false;
+              break;
+            default:
+              break;
+          }
+        });
+      }
+
+      if (Theme.of(context).platform == TargetPlatform.android) {
+        openAppSettings();
+      }
+    }
   }
 
   Future<void> _updateProfileData(String field, String value) async {
