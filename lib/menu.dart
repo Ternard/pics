@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MenuScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> menuItems = [
-    {'name': 'Shawarma Plate', 'price': '850 Ksh'},
-    {'name': 'Beef Burger', 'price': '650 Ksh'},
-    {'name': 'Chicken Wings', 'price': '750 Ksh'},
-    {'name': 'French Fries', 'price': '350 Ksh'},
-    {'name': 'Vegetable Salad', 'price': '450 Ksh'},
-    {'name': 'Soft Drinks', 'price': '150 Ksh'},
-    {'name': 'Mineral Water', 'price': '100 Ksh'},
-    {'name': 'Fruit Juice', 'price': '250 Ksh'},
-  ];
+  final Map<String, dynamic> restaurant;
+  final SupabaseClient supabase;
+
+  MenuScreen({Key? key, required this.restaurant})
+      : supabase = Supabase.instance.client,
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +20,14 @@ class MenuScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Restaurant Menu',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Colors.brown[700],
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               IconButton(
@@ -43,56 +38,98 @@ class MenuScreen extends StatelessWidget {
           ),
           const Divider(color: Colors.brown, thickness: 1),
           const SizedBox(height: 10),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: supabase
+                .from('restaurants')
+                .select('item, price')
+                .eq('id', restaurant['id'] ?? ''),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Colors.brown),
+                );
+              }
 
-          // Menu Items List
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: menuItems.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Text(
-                          menuItems[index]['name'],
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.brown[800],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.brown[50],
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          menuItems[index]['price'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown[700],
-                          ),
+                      const Icon(Icons.error, color: Colors.red, size: 40),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Failed to load menu',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.red,
                         ),
                       ),
                     ],
                   ),
                 );
-              },
-            ),
+              }
+
+              final menuItems = snapshot.data ?? [];
+
+              if (menuItems.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No menu items available',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.brown[400],
+                    ),
+                  ),
+                );
+              }
+
+              return SizedBox(
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: menuItems.length,
+                  itemBuilder: (context, index) {
+                    final item = menuItems[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item['item']?.toString() ?? 'Item',
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Colors.brown[800],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.brown[50],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              item['price']?.toString() ?? 'Price',
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Colors.brown[700],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           ),
           const SizedBox(height: 20),
         ],
       ),
-    );;
+    );
   }
 }

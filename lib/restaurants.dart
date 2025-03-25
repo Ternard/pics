@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'new_restaurant.dart';
 import 'restaurant_review.dart';
 import 'menu.dart';
@@ -7,30 +9,82 @@ class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
 
   @override
-  _RestaurantScreenState createState() => _RestaurantScreenState();
+  State<RestaurantScreen> createState() => _RestaurantScreenState();
 }
 
 class _RestaurantScreenState extends State<RestaurantScreen> {
-  int _currentIndex = 2;
+  final SupabaseClient supabase = Supabase.instance.client;
   final PageController _pageController = PageController();
+  List<Map<String, dynamic>> _restaurants = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+  int _currentIndex = 2;
 
-  void _showMenuPopup(BuildContext context) {
+  @override
+  void initState() {
+    super.initState();
+    _fetchRestaurants();
+  }
+
+  Future<void> _fetchRestaurants() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await supabase
+          .from('restaurants')
+          .select('*')
+          .order('created_at', ascending: false);
+
+      setState(() {
+        _restaurants = List<Map<String, dynamic>>.from(response);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Failed to load restaurants: ${e.toString()}";
+      });
+    }
+  }
+
+  Future<void> _launchMapsUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to open map: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  void _showMenuPopup(BuildContext context, Map<String, dynamic> restaurant) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: MenuScreen(),
-        );
-      },
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: MenuScreen(restaurant: restaurant),
+      ),
     );
   }
 
@@ -39,29 +93,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SingleChildScrollView(
+          child: NewRestaurantScreen(
+            onSubmit: (success, message) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message ?? (success ? "Restaurant Added" : "Error")),
+                  backgroundColor: success ? Colors.green : Colors.red,
+                ),
+              );
+              if (success) _fetchRestaurants();
+            },
           ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: SingleChildScrollView(
-            child: NewRestaurantScreen(
-              onSubmit: (bool success) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(success ? "Submission Added" : "Error"),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -70,76 +124,119 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SingleChildScrollView(
+          child: RestaurantReviewScreen(
+            onSubmit: (success, message) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message ?? (success ? "Review Added" : "Error")),
+                  backgroundColor: success ? Colors.green : Colors.red,
+                ),
+              );
+            },
           ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: SingleChildScrollView(
-            child: RestaurantReviewScreen(
-              onSubmit: (bool success) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(success ? "Review Added" : "Error"),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: _buildBottomNavigationBar(_currentIndex, context),
+      bottomNavigationBar: _buildBottomNavigationBar(),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: Stack(
                 children: [
-                  PageView(
-                    controller: _pageController,
-                    children: [
-                      _buildRestaurantPage(),
-                      _buildRestaurantPage(),
-                      _buildRestaurantPage(),
-                    ],
-                  ),
-                  Positioned(
-                    left: 10,
-                    top: MediaQuery.of(context).size.height / 2 - 20,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.brown),
-                      onPressed: () {
-                        _pageController.previousPage(
+                  if (_isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_errorMessage != null)
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error, size: 50, color: Colors.red),
+                          const SizedBox(height: 20),
+                          Text(
+                            "Error loading restaurants",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            _errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: _fetchRestaurants,
+                            child: const Text("Retry"),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (_restaurants.isEmpty)
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.restaurant, size: 50, color: Colors.brown),
+                            const SizedBox(height: 20),
+                            Text(
+                              "No restaurants found",
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              "Add a new restaurant to get started",
+                              style: TextStyle(color: Colors.brown),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      PageView.builder(
+                        controller: _pageController,
+                        itemCount: _restaurants.length,
+                        itemBuilder: (context, index) {
+                          return _buildRestaurantPage(_restaurants[index]);
+                        },
+                      ),
+                  if (_restaurants.isNotEmpty && _restaurants.length > 1)
+                    Positioned(
+                      left: 10,
+                      top: MediaQuery.of(context).size.height / 2 - 20,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios, color: Colors.brown),
+                        onPressed: () => _pageController.previousPage(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    right: 10,
-                    top: MediaQuery.of(context).size.height / 2 - 20,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios, color: Colors.brown),
-                      onPressed: () {
-                        _pageController.nextPage(
+                  if (_restaurants.isNotEmpty && _restaurants.length > 1)
+                    Positioned(
+                      right: 10,
+                      top: MediaQuery.of(context).size.height / 2 - 20,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_forward_ios, color: Colors.brown),
+                        onPressed: () => _pageController.nextPage(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -167,23 +264,22 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
-  Widget _buildRestaurantPage() {
+  Widget _buildRestaurantPage(Map<String, dynamic> restaurant) {
     return SingleChildScrollView(
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             color: const Color(0xFFF5DEB3),
             child: Row(
               children: [
                 const Icon(Icons.restaurant, color: Colors.brown),
-                const SizedBox(width: 8.0),
+                const SizedBox(width: 8),
                 Text(
                   'MealMeter',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Colors.brown[700],
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -192,32 +288,52 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
             child: Image.network(
-              'https://source.unsplash.com/400x300/?restaurant',
+              restaurant['image.url'] ?? 'https://source.unsplash.com/400x300/?restaurant',
               width: double.infinity,
               height: 200,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Image.network(
+                'https://source.unsplash.com/400x300/?restaurant',
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            'Shawarma Street',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+            restaurant['res.name'] ?? 'Restaurant Name',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: Colors.brown[700],
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.location_on, color: Colors.brown),
-              const SizedBox(width: 5),
-              Text(
-                'Restaurant Location',
-                style: TextStyle(color: Colors.brown[700]),
-              ),
-            ],
+          InkWell(
+            onTap: () {
+              final locationUrl = restaurant['location.url'];
+              if (locationUrl != null && locationUrl.isNotEmpty) {
+                _launchMapsUrl(locationUrl);
+              }
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.location_on, color: Colors.brown),
+                const SizedBox(width: 5),
+                Text(
+                  restaurant['location.url'] != null ? "View on Map" : "Location not available",
+                  style: TextStyle(
+                    color: Colors.brown[700],
+                    decoration: restaurant['location.url'] != null
+                        ? TextDecoration.underline
+                        : TextDecoration.none,
+                  ),
+                ),
+                if (restaurant['location.url'] != null)
+                  const Icon(Icons.open_in_new, size: 16, color: Colors.brown),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
@@ -225,7 +341,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               backgroundColor: Colors.brown,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             ),
-            onPressed: () => _showMenuPopup(context),
+            onPressed: () => _showMenuPopup(context, restaurant),
             child: const Text('Menu', style: TextStyle(color: Colors.white)),
           ),
           const SizedBox(height: 20),
@@ -236,10 +352,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               children: [
                 Text(
                   'Customer Reviews',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.brown[700],
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -302,18 +417,16 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
-  Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
+  BottomNavigationBar _buildBottomNavigationBar() {
     return BottomNavigationBar(
       backgroundColor: const Color(0xFFF5E1BE),
       selectedItemColor: Colors.brown[700],
       unselectedItemColor: Colors.brown[400],
       showSelectedLabels: false,
       showUnselectedLabels: false,
-      currentIndex: currentIndex,
+      currentIndex: _currentIndex,
       onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
+        setState(() => _currentIndex = index);
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
@@ -356,6 +469,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         ),
       ),
       label: "",
-    );;
+    );
   }
 }
