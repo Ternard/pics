@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ContactUsScreen extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
+  final SupabaseClient supabase = Supabase.instance.client;
 
   ContactUsScreen({super.key});
 
@@ -16,6 +18,41 @@ class ContactUsScreen extends StatelessWidget {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not launch $url')),
+      );
+    }
+  }
+
+  Future<void> _submitForm(BuildContext context) async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final message = messageController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || message.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    try {
+      await supabase.from('contact_us').insert({
+        'name': name,
+        'email': email,
+        'help': message,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      // Clear the form after successful submission
+      nameController.clear();
+      emailController.clear();
+      messageController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Thank you for contacting us!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error submitting form: $e')),
       );
     }
   }
@@ -55,7 +92,7 @@ class ContactUsScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => _submitForm(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown[700],
                     shape: RoundedRectangleBorder(
