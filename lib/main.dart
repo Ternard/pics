@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth_service.dart';
@@ -17,7 +18,10 @@ void main() async {
   await Supabase.initialize(
     url: 'https://pokfgifldgnorifrmetp.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBva2ZnaWZsZGdub3JpZnJtZXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNzA1NTYsImV4cCI6MjA1Nzk0NjU1Nn0.DcQuWYaEw9DqjCer7PENJG9hMEYTMr-KOui4ia23WQQ',
+    debug: true, // Added debug mode for better error logging
   );
+
+  usePathUrlStrategy();
 
   runApp(const MealMeterApp());
 }
@@ -29,6 +33,11 @@ class MealMeterApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
+        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       home: FutureBuilder<bool>(
         future: AuthService().isLoggedIn(),
         builder: (context, snapshot) {
@@ -55,6 +64,14 @@ class MealMeterApp extends StatelessWidget {
         '/search': (context) => const SearchScreen(),
         '/contact': (context) => ContactUsScreen(),
       },
+      onGenerateRoute: (settings) {
+        // Handle any undefined routes
+        return MaterialPageRoute(
+          builder: (context) => const Scaffold(
+            body: Center(child: Text('Page not found')),
+          ),
+        );
+      },
     );
   }
 }
@@ -78,7 +95,7 @@ class SplashScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                final isLoggedIn = await AuthService().isLoggedIn();;
+                final isLoggedIn = await AuthService().isLoggedIn();
                 Navigator.pushReplacementNamed(
                   context,
                   isLoggedIn ? '/home' : '/signup',
@@ -90,12 +107,14 @@ class SplashScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
+                elevation: 5,
               ),
               child: const Text(
                 "Get Started",
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.white,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
