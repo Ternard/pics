@@ -144,6 +144,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Stack(
+              children: [
+                Icon(Icons.notifications, color: Colors.brown[700]),
+                if (_notificationsEnabled)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: () {
+              _toggleNotifications(!_notificationsEnabled);
+            },
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -236,28 +264,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Checkbox(
-                value: _notificationsEnabled,
-                onChanged: (value) {
-                  if (value != null) {
-                    _toggleNotifications(value);
-                  }
-                },
-              ),
-              Text(
-                "Notifications",
-                style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.brown[700]
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 30),
           TextButton.icon(
             onPressed: _logout,
             icon: Icon(Icons.logout, color: Colors.brown[700]),
@@ -399,6 +406,6 @@ class ProfileField extends StatelessWidget {
           ],
         ),
       ),
-    );;
+    );
   }
 }

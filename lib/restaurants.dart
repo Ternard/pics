@@ -92,7 +92,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (context) => Container(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
