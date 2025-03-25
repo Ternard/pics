@@ -190,7 +190,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   BottomNavigationBarItem _buildNavItem(IconData icon, int index, int currentIndex) {
-    final isSelected = currentIndex == index;
+    final isSelected = currentIndex == index;;
     return BottomNavigationBarItem(
       icon: Container(
         padding: const EdgeInsets.all(8),

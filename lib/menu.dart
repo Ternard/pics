@@ -93,6 +93,6 @@ class MenuScreen extends StatelessWidget {
           const SizedBox(height: 20),
         ],
       ),
-    );
+    );;
   }
 }

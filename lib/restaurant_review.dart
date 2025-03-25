@@ -101,6 +101,6 @@ class _RestaurantReviewScreenState extends State<RestaurantReviewScreen> {
           ),
         ],
       ),
-    );
+    );;
   }
 }

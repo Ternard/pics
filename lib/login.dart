@@ -168,7 +168,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: _isLoading
                       ? null
                       : () {
-                    Navigator.pushNamed(context, '/signup');
+                    Navigator.pushNamed(context, '/signup');;
                   },
                   child: Text(
                     "Don't have an account? Sign Up",

@@ -172,6 +172,6 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
           ),
         ],
       ),
-    );
+    );;
   }
 }

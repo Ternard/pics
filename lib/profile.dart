@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
-import 'auth_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'settings.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -14,11 +14,10 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final AuthService authService = AuthService();
   final ImagePicker _picker = ImagePicker();
+  final SupabaseClient supabase = Supabase.instance.client;
   XFile? _imageFile;
-  String _email = "user@example.com";
-  String _phoneNumber = "+254 708 756 456";
+  String _email = "";
   bool _notificationsEnabled = true;
   int _currentIndex = 4;
 
@@ -69,41 +68,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _updatePhoneNumber() async {
-    final TextEditingController phoneController =
-    TextEditingController(text: _phoneNumber);
-    final newPhone = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Update Phone Number'),
-        content: TextField(
-          controller: phoneController,
-          decoration: const InputDecoration(labelText: 'Phone Number'),
-          keyboardType: TextInputType.phone,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, phoneController.text),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-
-    if (newPhone != null && newPhone.isNotEmpty && mounted) {
-      setState(() {
-        _phoneNumber = newPhone;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Phone number updated')),
-      );
-    }
-  }
-
   Future<void> _toggleNotifications(bool value) async {
     if (mounted) {
       setState(() {
@@ -113,13 +77,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    // Load actual user data from your auth service
-    // final user = await authService.getCurrentUser();
-    // if (mounted) {
-    //   setState(() {
-    //     _email = user.email ?? "user@example.com";
-    //   });
-    // }
+    try {
+      final user = supabase.auth.currentUser;
+      if (user != null && mounted) {
+        setState(() {
+          _email = user.email ?? "No email found";
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load user data: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await supabase.auth.signOut();
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/login',
+                (route) => false
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Logout failed: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -246,10 +236,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          ProfileField(
-            text: _phoneNumber,
-            onTap: _updatePhoneNumber,
-          ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -273,17 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 10),
           TextButton.icon(
-            onPressed: () async {
-              try {
-                await authService.logout(context);
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Logout failed: $e')),
-                  );
-                }
-              }
-            },
+            onPressed: _logout,
             icon: Icon(Icons.logout, color: Colors.brown[700]),
             label: Text(
               "Log Out",
@@ -423,6 +399,6 @@ class ProfileField extends StatelessWidget {
           ],
         ),
       ),
-    );
+    );;
   }
 }

@@ -31,7 +31,7 @@ class AuthService {
 
   Future<void> logout(BuildContext context) async {
     try {
-      await _supabase.auth.signOut();
+      await _supabase.auth.signOut();;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', false);
 

@@ -101,6 +101,6 @@ class _MealReviewScreenState extends State<MealReviewScreen> {
           ),
         ],
       ),
-    );
+    );;
   }
 }

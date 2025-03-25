@@ -78,7 +78,7 @@ class SplashScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                final isLoggedIn = await AuthService().isLoggedIn();
+                final isLoggedIn = await AuthService().isLoggedIn();;
                 Navigator.pushReplacementNamed(
                   context,
                   isLoggedIn ? '/home' : '/signup',
