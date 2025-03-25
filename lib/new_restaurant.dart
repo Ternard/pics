@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,6 +25,7 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
   XFile? _image;
   final SupabaseClient supabase = Supabase.instance.client;
   bool _isLoading = false;
+  String? _imageName;
 
   bool _isValidMapUrl(String url) {
     final uri = Uri.tryParse(url);
@@ -50,31 +52,35 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
         throw Exception('Please enter a valid Google Maps or Apple Maps URL');
       }
 
-      // Upload image (public bucket doesn't require auth)
+      // Upload image to public folder
       final imageFile = File(_image!.path);
       final imageExt = _image!.path.split('.').last;
-      final imageName = 'restaurants/${DateTime.now().millisecondsSinceEpoch}.$imageExt';
+      _imageName = 'public/${DateTime.now().millisecondsSinceEpoch}.$imageExt';
 
       await supabase.storage
           .from('restaurant')
-          .upload(imageName, imageFile, fileOptions: FileOptions(
-        contentType: 'image/$imageExt',
-        upsert: false,
-      ));
+          .upload(
+        _imageName!,
+        imageFile,
+        fileOptions: FileOptions(
+          contentType: 'image/$imageExt',
+          upsert: false,
+        ),
+      );
 
       final imageUrl = supabase.storage
           .from('restaurant')
-          .getPublicUrl(imageName);
+          .getPublicUrl(_imageName!);
 
-      // Insert restaurant (no auth required)
+      // Insert restaurant
       final restaurantResponse = await supabase
           .from('restaurants')
           .insert({
         'res.name': _nameController.text,
         'location.url': locationUrl,
         'image.url': imageUrl,
-        'owner_id': null, // No owner since no auth
-      }).select();
+      })
+          .select();
 
       if (restaurantResponse.isEmpty) {
         throw Exception('Failed to create restaurant');
@@ -84,8 +90,8 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
       for (var item in _menuItems) {
         if (item['item']?.isNotEmpty ?? false) {
           await supabase.from('menu_items').insert({
-            'restaurant_id': restaurantResponse.first['id'],
-            'name': item['item'],
+            'res_id': restaurantResponse.first['id'], // Using res_id as foreign key
+            'item': item['item'], // Using item instead of name
             'price': item['price'] ?? '',
           });
         }
@@ -93,6 +99,10 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
 
       widget.onSubmit(true, "Restaurant added successfully!");
     } catch (e) {
+      // Clean up uploaded image if operation failed
+      if (_imageName != null) {
+        await supabase.storage.from('restaurant').remove([_imageName!]);
+      }
       widget.onSubmit(false, "Error: ${e.toString()}");
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -164,29 +174,29 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
             ),
             const SizedBox(height: 16),
             GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: _image == null
-                    ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_a_photo, size: 40),
-                      Text('Add Restaurant Image'),
-                    ],
+                onTap: _pickImage,
+                child: Container(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                )
-                    : Image.file(File(_image!.path)),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('Menu Items', style: TextStyle(fontSize: 16)),
-            ..._menuItems.asMap().entries.map((entry) {
+                  child: _image == null
+                      ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_a_photo, size: 40),
+                        Text('Add Restaurant Image'),
+                      ],
+                    ),
+                  )
+                      : Image.file(File(_image!.path)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('Menu Items', style: TextStyle(fontSize: 16)),
+                ..._menuItems.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
               return Padding(
@@ -202,6 +212,12 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (value) => _updateMenuItem(index, 'item', value),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -214,7 +230,19 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
                           border: OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        ],
                         onChanged: (value) => _updateMenuItem(index, 'price', value),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Invalid number';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     IconButton(
@@ -243,7 +271,7 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-          ],
+      ],
         ),
       ),
     );
