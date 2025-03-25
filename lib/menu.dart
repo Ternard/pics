@@ -5,7 +5,7 @@ class MenuScreen extends StatelessWidget {
   final Map<String, dynamic> restaurant;
   final SupabaseClient supabase;
 
-   MenuScreen({Key? key, required this.restaurant})
+  MenuScreen({Key? key, required this.restaurant})
       : supabase = Supabase.instance.client,
         super(key: key);
 

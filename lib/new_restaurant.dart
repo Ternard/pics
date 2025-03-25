@@ -174,29 +174,29 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
             ),
             const SizedBox(height: 16),
             GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _image == null
-                      ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_a_photo, size: 40),
-                        Text('Add Restaurant Image'),
-                      ],
-                    ),
-                  )
-                      : Image.file(File(_image!.path)),
-                  ),
+              onTap: _pickImage,
+              child: Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(height: 16),
-                const Text('Menu Items', style: TextStyle(fontSize: 16)),
-                ..._menuItems.asMap().entries.map((entry) {
+                child: _image == null
+                    ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_a_photo, size: 40),
+                      Text('Add Restaurant Image'),
+                    ],
+                  ),
+                )
+                    : Image.file(File(_image!.path)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text('Menu Items', style: TextStyle(fontSize: 16)),
+            ..._menuItems.asMap().entries.map((entry) {
               final index = entry.key;
               final item = entry.value;
               return Padding(
@@ -271,7 +271,7 @@ class _NewRestaurantScreenState extends State<NewRestaurantScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-      ],
+          ],
         ),
       ),
     );
