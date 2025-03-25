@@ -19,6 +19,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   int _currentIndex = 2;
+  Map<String, List<Map<String, dynamic>>> _restaurantReviews = {};
 
   @override
   void initState() {
@@ -40,13 +41,59 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
       setState(() {
         _restaurants = List<Map<String, dynamic>>.from(response);
-        _isLoading = false;
       });
+
+      await _fetchAllReviews();
     } catch (e) {
       setState(() {
         _isLoading = false;
         _errorMessage = "Failed to load restaurants: ${e.toString()}";
       });
+    }
+  }
+
+  Future<void> _fetchAllReviews() async {
+    try {
+      final response = await supabase
+          .from('reviews')
+          .select('*')
+          .order('created_at', ascending: false);
+
+      final Map<String, List<Map<String, dynamic>>> reviewsMap = {};
+      for (var review in response) {
+        final restaurantId = review['rev_id'] as String;
+        reviewsMap.putIfAbsent(restaurantId, () => []).add(review);
+      }
+
+      setState(() {
+        _restaurantReviews = reviewsMap;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Failed to load reviews: ${e.toString()}";
+      });
+    }
+  }
+
+  Future<void> _fetchReviewsForRestaurant(String restaurantId) async {
+    try {
+      final response = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('rev_id', restaurantId)
+          .order('created_at', ascending: false);
+
+      setState(() {
+        _restaurantReviews[restaurantId] = List<Map<String, dynamic>>.from(response);
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load reviews: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -118,7 +165,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
-  void _showAddReviewPopup(BuildContext context) {
+  void _showAddReviewPopup(BuildContext context, String restaurantId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -141,7 +188,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   backgroundColor: success ? Colors.green : Colors.red,
                 ),
               );
+              if (success) _fetchReviewsForRestaurant(restaurantId);
             },
+            restaurantId: restaurantId,
           ),
         ),
       ),
@@ -252,11 +301,17 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               backgroundColor: Colors.brown,
               child: const Icon(Icons.add, color: Colors.white),
             ),
-            FloatingActionButton(
-              onPressed: () => _showAddReviewPopup(context),
-              backgroundColor: Colors.brown,
-              child: const Icon(Icons.edit, color: Colors.white),
-            ),
+            if (_restaurants.isNotEmpty)
+              FloatingActionButton(
+                onPressed: () {
+                  final currentIndex = _pageController.page?.round() ?? 0;
+                  if (currentIndex < _restaurants.length) {
+                    _showAddReviewPopup(context, _restaurants[currentIndex]['id']);
+                  }
+                },
+                backgroundColor: Colors.brown,
+                child: const Icon(Icons.edit, color: Colors.white),
+              ),
           ],
         ),
       ),
@@ -264,6 +319,9 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   }
 
   Widget _buildRestaurantPage(Map<String, dynamic> restaurant) {
+    final restaurantId = restaurant['id'] as String;
+    final reviews = _restaurantReviews[restaurantId] ?? [];
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -357,21 +415,33 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  height: 180,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildReviewCard('Brandon White', '4.2', 'Best service ever!'),
-                        const SizedBox(width: 10),
-                        _buildReviewCard('Victoria Malen', '4.5', 'Amazing food!'),
-                        const SizedBox(width: 10),
-                        _buildReviewCard('John Doe', '4.8', 'Highly recommended!'),
-                      ],
+                if (reviews.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Text(
+                      'No reviews yet. Be the first to review!',
+                      style: TextStyle(color: Colors.brown),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 180,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: reviews.map((review) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: _buildReviewCard(
+                              review['reviewer_name'] ?? 'Anonymous',
+                              review['rating'] ?? 0,
+                              review['remark'] ?? '',
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -381,35 +451,66 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
-  Widget _buildReviewCard(String name, String rating, String review) {
+  Widget _buildReviewCard(String name, dynamic rating, String review) {
+    final ratingValue = rating is int ? rating.toDouble() :
+    rating is double ? rating :
+    double.tryParse(rating.toString()) ?? 0;
+
     return Container(
-      width: 160,
+      width: 180,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFFF5DEB3),
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             name,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.brown,
+            ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.star, color: Colors.orange, size: 18),
-              const SizedBox(width: 5),
-              Text(rating, style: const TextStyle(fontSize: 16)),
+              ...List.generate(5, (index) {
+                return Icon(
+                  Icons.star,
+                  color: index < ratingValue ? Colors.amber : Colors.grey[300],
+                  size: 20,
+                );
+              }),
+              const SizedBox(width: 8),
+              Text(
+                ratingValue.toStringAsFixed(1),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 8),
           Text(
             review,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.black54, fontSize: 14),
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 14,
+            ),
           ),
         ],
       ),
