@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'new_meal.dart';  // Import the new meal screen
+import 'new_meal.dart';
+import 'plate_provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -23,9 +25,21 @@ class _SearchScreenState extends State<SearchScreen> {
   ];
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
-  int _currentIndex = 1; // Set to 1 for search screen
+  int _currentIndex = 1;
 
-  // Function to show the add new meal dialog
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['preselectedCategory'] != null) {
+        setState(() {
+          _selectedCategory = args['preselectedCategory'];
+        });
+      }
+    });
+  }
+
   void _showAddMealDialog() {
     showModalBottomSheet(
       context: context,
@@ -36,7 +50,7 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -51,7 +65,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 );
                 if (success) {
-                  _searchMeals(); // Refresh the search results
+                  _searchMeals();
                 }
               },
             ),
@@ -75,31 +89,145 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     try {
-      final query = supabase.from('meals').select('*');
-
-      // Add category filter if selected
-      if (_selectedCategory != null && _selectedCategory != "All") {
-        query.eq('category', _selectedCategory as Object);
-      }
-
-      // Add price filter
       final price = double.tryParse(_searchController.text);
-      if (price != null) {
-        query.lte('price', price);
+      if (price == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a valid price')),
+        );
+        return;
       }
 
-      final results = await query;
+      List<Map<String, dynamic>> results = [];
 
-      // Get image URLs for each result
-      final resultsWithImages = await Future.wait(results.map((meal) async {
-        return {
-          ...meal,
-          'image_url': meal['image.url'],
-        };
-      }));
+      if (_selectedCategory == null || _selectedCategory == "All") {
+        // Search all tables
+        final drinks = await supabase
+            .from('drinks')
+            .select()
+            .lte('drinks_price', price);
+        final meals = await supabase
+            .from('food')
+            .select()
+            .lte('food_price', price);
+        final snacks = await supabase
+            .from('snacks')
+            .select()
+            .lte('snacks_price', price);
+        final combos = await supabase
+            .from('combo')
+            .select()
+            .lte('combo_price', price);
+
+        results = [
+          ...drinks.map((e) => {
+            ...e,
+            'category': 'Drinks',
+            'name': e['drinks_name'],
+            'price': e['drinks_price'],
+            'desc': e['drinks_desc'],
+            'image_url': e['image.url'],
+            'location.url': e['location.url'],
+          }),
+          ...meals.map((e) => {
+            ...e,
+            'category': 'Meals',
+            'name': e['food_name'],
+            'price': e['food_price'],
+            'desc': e['food_desc'],
+            'image_url': e['image.url'],
+            'location.url': e['location.url'],
+          }),
+          ...snacks.map((e) => {
+            ...e,
+            'category': 'Snacks',
+            'name': e['snacks_name'],
+            'price': e['snacks_price'],
+            'desc': e['snacks_desc'],
+            'image_url': e['image.url'],
+            'location.url': e['location.url'],
+          }),
+          ...combos.map((e) => {
+            ...e,
+            'category': 'Combo Meals',
+            'name': e['combo_name'],
+            'price': e['combo_price'],
+            'desc': e['combo_desc'],
+            'image_url': e['image.url'],
+            'location.url': e['location.url'],
+          }),
+        ];
+      } else {
+        // Search specific table based on category
+        switch (_selectedCategory) {
+          case "Drinks":
+            results = (await supabase
+                .from('drinks')
+                .select()
+                .lte('drinks_price', price))
+                .map((e) => {
+              ...e,
+              'category': 'Drinks',
+              'name': e['drinks_name'],
+              'price': e['drinks_price'],
+              'desc': e['drinks_desc'],
+              'image_url': e['image.url'],
+              'location.url': e['location.url'],
+            })
+                .toList();
+            break;
+          case "Meals":
+            results = (await supabase
+                .from('food')
+                .select()
+                .lte('food_price', price))
+                .map((e) => {
+              ...e,
+              'category': 'Meals',
+              'name': e['food_name'],
+              'price': e['food_price'],
+              'desc': e['food_desc'],
+              'image_url': e['image.url'],
+              'location.url': e['location.url'],
+            })
+                .toList();
+            break;
+          case "Snacks":
+            results = (await supabase
+                .from('snacks')
+                .select()
+                .lte('snacks_price', price))
+                .map((e) => {
+              ...e,
+              'category': 'Snacks',
+              'name': e['snacks_name'],
+              'price': e['snacks_price'],
+              'desc': e['snacks_desc'],
+              'image_url': e['image.url'],
+              'location.url': e['location.url'],
+            })
+                .toList();
+            break;
+          case "Combo Meals":
+            results = (await supabase
+                .from('combo')
+                .select()
+                .lte('combo_price', price))
+                .map((e) => {
+              ...e,
+              'category': 'Combo Meals',
+              'name': e['combo_name'],
+              'price': e['combo_price'],
+              'desc': e['combo_desc'],
+              'image_url': e['image.url'],
+              'location.url': e['location.url'],
+            })
+                .toList();
+            break;
+        }
+      }
 
       setState(() {
-        _searchResults = List<Map<String, dynamic>>.from(resultsWithImages);
+        _searchResults = results;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -132,46 +260,24 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final plateProvider = Provider.of<PlateProvider>(context);
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF5E7C5),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Image.asset(
-                  'assets/logo.png',
-                  width: 40,
-                  height: 40,
-                  errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.restaurant, color: Colors.brown),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'MealMeter',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.brown,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Search',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.brown,
-              ),
-            ),
-          ],
+        title: const Text(
+          'Search',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.brown,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
       ),
-      backgroundColor: const Color(0xFFF5E7C5),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddMealDialog,
         backgroundColor: Colors.brown[700],
@@ -182,6 +288,28 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              Column(
+                children: [
+                  Image.asset(
+                    'assets/logo.png',
+                    width: 80,
+                    height: 80,
+                    errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.restaurant, size: 80, color: Colors.brown),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'MealMeter',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+
               Row(
                 children: [
                   Expanded(
@@ -334,7 +462,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                       size: 16, color: Colors.brown),
                                   const SizedBox(width: 5),
                                   Text(
-                                    '${meal['price']?.toString() ?? '0'} Ksh',
+                                    'Ksh ${meal['price']?.toString() ?? '0'} ',
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -348,6 +476,24 @@ class _SearchScreenState extends State<SearchScreen> {
                                 style: const TextStyle(
                                   fontSize: 14,
                                 ),
+                              ),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  plateProvider.addToPlate(meal);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${meal['name']} added to your plate!'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.brown[700],
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size(double.infinity, 40),
+                                ),
+                                child: const Text('Add to Plate'),
                               ),
                             ],
                           ),
@@ -379,7 +525,6 @@ class _SearchScreenState extends State<SearchScreen> {
             Navigator.pushNamed(context, '/home');
             break;
           case 1:
-          // Already on search screen
             break;
           case 2:
             Navigator.pushNamed(context, '/restaurant');

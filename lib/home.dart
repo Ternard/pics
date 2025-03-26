@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'plate_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,11 +20,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final plateProvider = Provider.of<PlateProvider>(context);
+
     return Scaffold(
       backgroundColor: Color(0xFFF5E7C5),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false, // This removes the back arrow
         title: Row(
           children: [
             Image.asset(
@@ -95,21 +100,38 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 20),
               Text(
-                'Your History...',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                'Your Plate...',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown,
+                ),
               ),
               SizedBox(height: 10),
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  _buildHistoryItem('CJ\'s', 'Kenyan', '4.5(100+ Reviews)', 'assets/cjs.jpg'),
-                  _buildHistoryItem('Shawarma Street', 'Kenyan', '3.9(600+ Reviews)', 'assets/shawarma.jpg'),
-                ],
-              ),
+              if (plateProvider.plateItems.isEmpty)
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'No items in your plate yet. Search and add meals!',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                )
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: plateProvider.plateItems.length,
+                  itemBuilder: (context, index) {
+                    final item = plateProvider.plateItems[index];
+                    return _buildPlateItem(item, index, plateProvider);
+                  },
+                ),
             ],
           ),
         ),
@@ -168,38 +190,55 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHistoryItem(String name, String type, String rating, String imagePath) {
+  Widget _buildPlateItem(Map<String, dynamic> item, int index, PlateProvider plateProvider) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.asset(
-                imagePath,
+      margin: EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                item['image_url'] ?? 'https://via.placeholder.com/100?text=No+Image',
+                width: 60,
+                height: 60,
                 fit: BoxFit.cover,
-                width: double.infinity,
                 errorBuilder: (context, error, stackTrace) => Container(
+                  width: 60,
+                  height: 60,
                   color: Colors.grey[200],
-                  child: Center(child: Icon(Icons.restaurant, size: 40)),
+                  child: Center(child: Icon(Icons.fastfood)),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(type, style: TextStyle(color: Colors.grey[600])),
-                Text(rating, style: TextStyle(color: Colors.orange)),
-              ],
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['name'] ?? 'No name',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    item['category'] ?? 'No category',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                  Text(
+                    'Ksh ${item['price']?.toString() ?? '0'}',
+                    style: TextStyle(color: Colors.brown[700]),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: () => plateProvider.removeFromPlate(index),
+            ),
+          ],
+        ),
       ),
     );
   }
