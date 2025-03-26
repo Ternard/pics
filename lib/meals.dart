@@ -26,7 +26,11 @@ class _MealScreenState extends State<MealScreen> {
   Future<void> _fetchMeals() async {
     try {
       // Fetch meal data from your 'meals' table
-      final mealsData = await supabase.from('meals').select('*');
+      final mealsData = await supabase.from('meals').select('''
+  *, 
+  image.url,
+  location.url
+''');
 
       // Get image URLs for each meal
       final mealsWithImages = await Future.wait(mealsData.map((meal) async {

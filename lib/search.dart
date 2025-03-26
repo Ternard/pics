@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'new_meal.dart';  // Import the new meal screen
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -8,174 +11,375 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  int _currentIndex = 1; // Track the current index
-  String? _selectedPeopleRange; // For No. of People dropdown
-  String? _selectedFoodType; // For Food Type dropdown
-
-  // Dropdown options for No. of People
-  final List<String> _peopleRanges = [
-    'Below 5',
-    '6-10',
-    '11-15',
-    '16-20',
-    'Above 20',
+  final SupabaseClient supabase = Supabase.instance.client;
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedCategory;
+  final List<String> _categories = [
+    "All",
+    "Drinks",
+    "Meals",
+    "Snacks",
+    "Combo Meals"
   ];
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isSearching = false;
+  int _currentIndex = 1; // Set to 1 for search screen
 
-  // Dropdown options for Food Type
-  final List<String> _foodTypes = [
-    'Drinks',
-    'Meals',
-    'Snacks',
-    'Combined Meals',
-  ];
+  // Function to show the add new meal dialog
+  void _showAddMealDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SingleChildScrollView(
+            child: NewMealScreen(
+              onSubmit: (bool success) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? "Meal Added Successfully" : "Error Adding Meal"),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+                if (success) {
+                  _searchMeals(); // Refresh the search results
+                }
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _searchMeals() async {
+    if (_searchController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a price to search')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+      _searchResults = [];
+    });
+
+    try {
+      final query = supabase.from('meals').select('*');
+
+      // Add category filter if selected
+      if (_selectedCategory != null && _selectedCategory != "All") {
+        query.eq('category', _selectedCategory as Object);
+      }
+
+      // Add price filter
+      final price = double.tryParse(_searchController.text);
+      if (price != null) {
+        query.lte('price', price);
+      }
+
+      final results = await query;
+
+      // Get image URLs for each result
+      final resultsWithImages = await Future.wait(results.map((meal) async {
+        return {
+          ...meal,
+          'image_url': meal['image.url'],
+        };
+      }));
+
+      setState(() {
+        _searchResults = List<Map<String, dynamic>>.from(resultsWithImages);
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Search failed: $e')),
+      );
+    } finally {
+      setState(() {
+        _isSearching = false;
+      });
+    }
+  }
+
+  Future<void> _launchMapsUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to open map: ${e.toString()}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: _buildBottomNavigationBar(_currentIndex, context),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                color: const Color(0xFFF5DEB3), // Beige color
-                child: Row(
-                  children: [
-                    Image.asset(
-                      'assets/logo.png', // Replace with your logo asset
-                      width: 40,
-                      height: 40,
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      'MealMeter',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.brown,
-                      ),
-                    ),
-                  ],
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  width: 40,
+                  height: 40,
+                  errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.restaurant, color: Colors.brown),
                 ),
-              ),
-              const SizedBox(height: 30),
-
-              // Location Input Field
-              _buildInputField(Icons.location_on, 'Location', isDropdown: false),
-              const SizedBox(height: 10),
-
-              // Budget Input Field
-              _buildInputField(Icons.attach_money, 'Budget (Ksh)', isDropdown: false),
-              const SizedBox(height: 10),
-
-              // No. of People Dropdown
-              _buildInputField(Icons.people, 'No. of People', isDropdown: true, dropdownItems: _peopleRanges, selectedValue: _selectedPeopleRange, onChanged: (value) {
-                setState(() {
-                  _selectedPeopleRange = value; // Update selected value
-                });
-              }),
-              const SizedBox(height: 10),
-
-              // Food Type Dropdown
-              _buildInputField(Icons.fastfood, 'Food Type', isDropdown: true, dropdownItems: _foodTypes, selectedValue: _selectedFoodType, onChanged: (value) {
-                setState(() {
-                  _selectedFoodType = value; // Update selected value
-                });
-              }),
-              const SizedBox(height: 20),
-
-              // Search Meals Button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.brown,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                const SizedBox(width: 8),
+                const Text(
+                  'MealMeter',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown,
                   ),
                 ),
-                onPressed: () {
-                  // Navigate to the MealScreen
-                  Navigator.pushNamed(context, '/meals');
-                },
-                child: const Text('Search Meals', style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Custom Input Field Widget
-  Widget _buildInputField(
-      IconData icon,
-      String hintText, {
-        bool isDropdown = false,
-        List<String>? dropdownItems,
-        String? selectedValue,
-        Function(String?)? onChanged,
-      }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5DEB3), // Beige color
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.brown),
-            const SizedBox(width: 10),
-            Expanded(
-              child: isDropdown
-                  ? DropdownButton<String>(
-                value: selectedValue,
-                hint: Text(hintText, style: TextStyle(color: Colors.brown)),
-                items: dropdownItems?.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value, style: TextStyle(color: Colors.brown)),
-                  );
-                }).toList(),
-                onChanged: onChanged,
-                underline: const SizedBox(), // Remove the default underline
-                isExpanded: true, // Allow the dropdown to expand
-              )
-                  : TextField(
-                decoration: InputDecoration(
-                    hintText: hintText,
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(color: Colors.brown)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Search',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.brown,
               ),
             ),
           ],
         ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
+      backgroundColor: const Color(0xFFF5E7C5),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddMealDialog,
+        backgroundColor: Colors.brown[700],
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        labelText: 'Search by maximum price (Ksh)',
+                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _searchMeals,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Search'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText: 'Filter by category',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                items: _categories.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedCategory = newValue;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              if (_isSearching)
+                const Center(child: CircularProgressIndicator())
+              else if (_searchResults.isEmpty && _searchController.text.isNotEmpty)
+                const Column(
+                  children: [
+                    Icon(Icons.search_off, size: 50, color: Colors.brown),
+                    SizedBox(height: 10),
+                    Text(
+                      'No meals found matching your criteria',
+                      style: TextStyle(color: Colors.brown),
+                    ),
+                  ],
+                )
+              else
+                ..._searchResults.map((meal) {
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(15)),
+                          child: Image.network(
+                            meal['image_url'] ??
+                                'https://via.placeholder.com/400x300?text=No+Image',
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  height: 200,
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                      child: Icon(Icons.fastfood, size: 50)),
+                                ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                meal['name'] ?? 'No name',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.category,
+                                      size: 16, color: Colors.brown),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    meal['category'] ?? 'No category',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              InkWell(
+                                onTap: () {
+                                  if (meal['location.url'] != null) {
+                                    _launchMapsUrl(meal['location.url']);
+                                  }
+                                },
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.location_on,
+                                        size: 16, color: Colors.brown),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      meal['location.url'] != null
+                                          ? 'View on Map'
+                                          : 'Location not available',
+                                      style: TextStyle(
+                                        color: meal['location.url'] != null
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                        decoration: meal['location.url'] != null
+                                            ? TextDecoration.underline
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.attach_money,
+                                      size: 16, color: Colors.brown),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    '${meal['price']?.toString() ?? '0'} Ksh',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                meal['desc'] ?? 'No description available',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  // Bottom Navigation Bar
-  Widget _buildBottomNavigationBar(int currentIndex, BuildContext context) {
+  BottomNavigationBar _buildBottomNavigationBar() {
     return BottomNavigationBar(
       backgroundColor: const Color(0xFFF5E1BE),
       selectedItemColor: Colors.brown[700],
       unselectedItemColor: Colors.brown[400],
       showSelectedLabels: false,
       showUnselectedLabels: false,
-      currentIndex: currentIndex,
+      currentIndex: _currentIndex,
       onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
+        setState(() => _currentIndex = index);
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
             break;
           case 1:
+          // Already on search screen
             break;
           case 2:
             Navigator.pushNamed(context, '/restaurant');
@@ -189,30 +393,36 @@ class _SearchScreenState extends State<SearchScreen> {
         }
       },
       items: [
-        _buildNavItem(Icons.home, 0),
-        _buildNavItem(Icons.search, 1),
-        _buildNavItem(Icons.restaurant_menu, 2),
-        _buildNavItem(Icons.phone, 3),
-        _buildNavItem(Icons.person, 4),
+        _buildBottomNavigationBarItem(Icons.home, 0),
+        _buildBottomNavigationBarItem(Icons.search, 1),
+        _buildBottomNavigationBarItem(Icons.restaurant_menu, 2),
+        _buildBottomNavigationBarItem(Icons.phone, 3),
+        _buildBottomNavigationBarItem(Icons.person, 4),
       ],
     );
   }
 
-  BottomNavigationBarItem _buildNavItem(IconData icon, int index) {
+  BottomNavigationBarItem _buildBottomNavigationBarItem(IconData icon, int index) {
     final isSelected = _currentIndex == index;
     return BottomNavigationBarItem(
       icon: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isSelected ? Colors.brown[700] : Colors.brown[100],
+          color: isSelected ? Colors.brown[700] : Colors.transparent,
         ),
         child: Icon(
           icon,
           color: isSelected ? Colors.white : Colors.brown[700],
         ),
       ),
-      label: '',
-    );;
+      label: "",
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }

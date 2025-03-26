@@ -17,13 +17,19 @@ class _NewMealScreenState extends State<NewMealScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
-  String? _imagePath;
   bool _isUploading = false;
+  String? _selectedCategory;
+  final List<String> _categories = [
+    "Drinks",
+    "Meals",
+    "Snacks",
+    "Combo Meals"
+  ];
 
-  // Add your form controllers (name, description, price, etc.)
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
 
   Future<void> _pickImage() async {
     try {
@@ -57,7 +63,9 @@ class _NewMealScreenState extends State<NewMealScreen> {
           .from('meals')
           .upload(filePath, file);
 
-      return filePath;
+      return supabase.storage
+          .from('meals')
+          .getPublicUrl(filePath);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to upload image: $e')),
@@ -70,19 +78,89 @@ class _NewMealScreenState extends State<NewMealScreen> {
     }
   }
 
-  Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _insertIntoCategoryTable() async {
+    if (_selectedCategory == null) return;
 
-    final imagePath = await _uploadImage();
+    final name = _nameController.text;
+    final price = double.tryParse(_priceController.text) ?? 0;
+    final description = _descriptionController.text;
+    final imageUrl = await _uploadImage();
 
     try {
+      switch (_selectedCategory) {
+        case "Drinks":
+          await supabase.from('drinks').insert({
+            'drinks_name': name,
+            'drinks_price': price,
+            'drinks_desc': description,
+            'image.url': imageUrl,
+            'location.url': _locationController.text,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+          break;
+        case "Meals":
+          await supabase.from('food').insert({
+            'food_name': name,
+            'food_price': price,
+            'food_desc': description,
+            'image.url': imageUrl,
+            'location.url': _locationController.text,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+          break;
+        case "Snacks":
+          await supabase.from('snacks').insert({
+            'snacks_name': name,
+            'snacks_price': price,
+            'snacks_desc': description,
+            'image.url': imageUrl,
+            'location.url': _locationController.text,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+          break;
+        case "Combo Meals":
+          await supabase.from('combo').insert({
+            'combo_name': name,
+            'combo_price': price,
+            'combo_desc': description,
+            'image.url': imageUrl,
+            'location.url': _locationController.text,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+          break;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add to category table: $e')),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate() || _selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields and select a category')),
+      );
+      return;
+    }
+
+    try {
+      final imageUrl = await _uploadImage();
+
+      // Insert into meals table
       await supabase.from('meals').insert({
         'name': _nameController.text,
-        'description': _descriptionController.text,
         'price': double.parse(_priceController.text),
-        'image_path': imagePath,
+        'desc': _descriptionController.text,
+        'image.url': imageUrl,
+        'location.url': _locationController.text,
+        'category': _selectedCategory,
         'created_at': DateTime.now().toIso8601String(),
       });
+
+      // Insert into specific category table
+      await _insertIntoCategoryTable();
 
       widget.onSubmit(true);
     } catch (e) {
@@ -101,20 +179,61 @@ class _NewMealScreenState extends State<NewMealScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              decoration: InputDecoration(
+                labelText: 'Category',
+                border: OutlineInputBorder(),
+              ),
+              items: _categories.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  _selectedCategory = newValue;
+                });
+              },
+              validator: (value) => value == null ? 'Required' : null,
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Meal Name'),
+              decoration: InputDecoration(
+                labelText: 'Name',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
               maxLines: 3,
+              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _priceController,
-              decoration: InputDecoration(labelText: 'Price (Ksh)'),
+              decoration: InputDecoration(
+                labelText: 'Price (Ksh)',
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
+              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _locationController,
+              decoration: InputDecoration(
+                labelText: 'Location URL',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
             ),
             const SizedBox(height: 20),
@@ -155,6 +274,7 @@ class _NewMealScreenState extends State<NewMealScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 }
