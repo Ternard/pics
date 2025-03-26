@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,225 +8,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final supabase = Supabase.instance.client;
-  Position? _currentPosition;
-  bool _isLoading = true;
-  String _locationError = '';
-  List<Map<String, dynamic>> _restaurants = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _getLocationAndRestaurants();
-  }
-
-  Future<void> _getLocationAndRestaurants() async {
-    await _getUserLocation();
-    await _fetchRestaurants();
-  }
-
-  Future<void> _getUserLocation() async {
-    setState(() {
-      _isLoading = true;
-      _locationError = '';
-    });
-
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        setState(() {
-          _locationError = 'Please enable location services';
-          _isLoading = false;
-        });
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            _locationError = 'Location permissions are denied';
-            _isLoading = false;
-          });
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _locationError = 'Location permissions are permanently denied';
-          _isLoading = false;
-        });
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
-      );
-
-      setState(() {
-        _currentPosition = position;
-      });
-    } catch (e) {
-      setState(() {
-        _locationError = 'Error getting location: ${e.toString()}';
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _fetchRestaurants() async {
-    try {
-      final response = await supabase
-          .from('restaurants')
-          .select('res.name, location.url, image.url, latitude, longitude');
-
-      if (_currentPosition != null) {
-        List<Map<String, dynamic>> restaurantsWithDistance = response.map((restaurant) {
-          double distance = Geolocator.distanceBetween(
-            _currentPosition!.latitude,
-            _currentPosition!.longitude,
-            restaurant['latitude'] ?? 0,
-            restaurant['longitude'] ?? 0,
-          ) / 1000;
-
-          return {
-            ...restaurant,
-            'distance': distance,
-            'distanceText': distance < 1
-                ? '${(distance * 1000).toStringAsFixed(0)} m Away'
-                : '${distance.toStringAsFixed(1)} km Away',
-          };
-        }).toList();
-
-        restaurantsWithDistance.sort((a, b) => a['distance'].compareTo(b['distance']));
-
-        setState(() {
-          _restaurants = restaurantsWithDistance;
-        });
-      } else {
-        setState(() {
-          _restaurants = List<Map<String, dynamic>>.from(response);
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _locationError = 'Error loading restaurants: ${e.toString()}';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Widget _buildRestaurantCard(Map<String, dynamic> restaurant) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/restaurant',
-          arguments: restaurant,
-        );
-      },
-      child: Container(
-        width: 180,
-        margin: EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 6,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.network(
-                restaurant['image.url'] ?? 'https://via.placeholder.com/180',
-                height: 120,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 120,
-                  color: Colors.grey[200],
-                  child: Icon(Icons.restaurant, size: 40),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    restaurant['res.name'] ?? 'Restaurant',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4),
-                  if (restaurant['distanceText'] != null)
-                    Text(
-                      restaurant['distanceText'],
-                      style: TextStyle(
-                        color: Colors.brown[700],
-                        fontSize: 14,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHistoryItem(String name, String type, String rating, String imagePath) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[200],
-                  child: Center(child: Icon(Icons.restaurant, size: 40)),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(type, style: TextStyle(color: Colors.grey[600])),
-                Text(rating, style: TextStyle(color: Colors.orange)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'Drinks', 'icon': Icons.local_drink, 'color': Colors.blue},
+    {'name': 'Meals', 'icon': Icons.lunch_dining, 'color': Colors.green},
+    {'name': 'Combo', 'icon': Icons.set_meal, 'color': Colors.orange},
+    {'name': 'Snacks', 'icon': Icons.fastfood, 'color': Colors.red},
+    {'name': 'All', 'icon': Icons.all_inclusive, 'color': Colors.purple},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -295,43 +82,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              Text(
-                'Restaurants near you...',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              if (_isLoading)
-                Center(child: CircularProgressIndicator())
-              else if (_locationError.isNotEmpty)
-                Column(
-                  children: [
-                    Icon(Icons.location_off, size: 40, color: Colors.brown[700]),
-                    SizedBox(height: 8),
-                    Text(
-                      _locationError,
-                      style: TextStyle(color: Colors.brown[700]),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: _getLocationAndRestaurants,
-                      child: Text('Enable Location'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown[700],
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                )
-              else
-                SizedBox(
-                  height: 220,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _restaurants.length,
-                    itemBuilder: (context, index) => _buildRestaurantCard(_restaurants[index]),
-                  ),
+              // Category Tiles Row
+              Container(
+                height: 110,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _categories.length,
+                  itemBuilder: (context, index) {
+                    return _buildCategoryTile(_categories[index]);
+                  },
                 ),
+              ),
               SizedBox(height: 20),
               Text(
                 'Your History...',
@@ -354,6 +115,92 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: _buildBottomNavigationBar(0, context),
+    );
+  }
+
+  Widget _buildCategoryTile(Map<String, dynamic> category) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/search',
+          arguments: {'preselectedCategory': category['name']},
+        );
+      },
+      child: Container(
+        width: 80,
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                color: category['color'].withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: category['color'].withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: Icon(
+                  category['icon'],
+                  size: 30,
+                  color: category['color'],
+                ),
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              category['name'],
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.brown[800],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryItem(String name, String type, String rating, String imagePath) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[200],
+                  child: Center(child: Icon(Icons.restaurant, size: 40)),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(type, style: TextStyle(color: Colors.grey[600])),
+                Text(rating, style: TextStyle(color: Colors.orange)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

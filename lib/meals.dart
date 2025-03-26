@@ -284,7 +284,7 @@ class _MealScreenState extends State<MealScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildReviewCard('Brandon White', '4.2', 'Best Customer Service I\'ve ever had...'),
+                        _buildReviewCard('Brandon White', '4.2', 'Best Customer Service Ive ever had...'),
                         const SizedBox(width: 10),
                         _buildReviewCard('Victoria Malen', '', 'The meals are so flavorful & aesthetic...'),
                         const SizedBox(width: 10),
