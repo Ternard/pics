@@ -146,6 +146,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.menu, color: Colors.brown),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SettingsPage()
+                ),
+              );
+            },
+          ),
+          IconButton(
             icon: Stack(
               children: [
                 Icon(Icons.notifications, color: Colors.brown[700]),
@@ -280,25 +291,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SettingsPage()
-                      ),
-                    );
-                  },
-                  child: Text(
-                    "App Settings",
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.brown[700]
-                    ),
-                  ),
-                ),
                 GestureDetector(
                   onTap: _launchWebsite,
                   child: Text(
