@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'plate_provider.dart';
+import 'event_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(width: 8),
             Text(
-              'MealMeter',
+              'Pics',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

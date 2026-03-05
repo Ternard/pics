@@ -7,10 +7,10 @@ import 'auth_service.dart';
 import 'contact_us.dart';
 import 'home.dart';
 import 'login.dart';
-import 'meals.dart';
-import 'plate_provider.dart';
+import 'events.dart';
+import 'event_provider.dart';
 import 'profile.dart';
-import 'restaurants.dart';
+import 'event_gallery.dart';
 import 'search.dart';
 import 'sign_up.dart';
 
@@ -18,8 +18,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
-    url: 'https://pokfgifldgnorifrmetp.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBva2ZnaWZsZGdub3JpZnJtZXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNzA1NTYsImV4cCI6MjA1Nzk0NjU1Nn0.DcQuWYaEw9DqjCer7PENJG9hMEYTMr-KOui4ia23WQQ',
+    url: 'https://bscypeqozgsrcgmhqjns.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzY3lwZXFvemdzcmNnbWhxam5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTMyNTEsImV4cCI6MjA4Nzc4OTI1MX0.H2UfLTkjRyOu5YmDMr9Hzjfz-djVQgAPzeNX0fMyThY',
     debug: true,
   );
 
@@ -30,13 +30,13 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => PlateProvider()),
       ],
-      child: const MealMeterApp(),
+      child: const PicsApp(),
     ),
   );
 }
 
-class MealMeterApp extends StatelessWidget {
-  const MealMeterApp({super.key});
+class PicsApp extends StatelessWidget {
+  const PicsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -83,8 +83,8 @@ class MealMeterApp extends StatelessWidget {
                       'Error checking login status: ${snapshot.error}',
                       style: const TextStyle(color: Colors.red)),
                 ));
-                }
-                return snapshot.data == true ? HomeScreen() : const SplashScreen();
+          }
+          return snapshot.data == true ? HomeScreen() : const SplashScreen();
         },
       ),
       routes: {
@@ -178,7 +178,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'MealMeter',
+              'Pics',
               style: GoogleFonts.poppins(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

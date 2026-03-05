@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      "MealMeter",
+                      "Pics",
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

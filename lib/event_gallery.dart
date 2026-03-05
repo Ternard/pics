@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'new_restaurant.dart';
-import 'restaurant_review.dart';
-import 'menu.dart';
+import 'photo_report.dart';
+import 'event_details.dart';
 
 class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
@@ -333,7 +333,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                 const Icon(Icons.restaurant, color: Colors.brown),
                 const SizedBox(width: 8),
                 Text(
-                  'MealMeter',
+                  'Pics',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Colors.brown[700],
                     fontWeight: FontWeight.bold,

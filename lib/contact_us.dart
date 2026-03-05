@@ -108,7 +108,7 @@ class ContactUsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                "mealmeter@gmail.com",
+                "pics@gmail.com",
                 style: TextStyle(fontSize: 14, color: Colors.brown[700]),
               ),
               const SizedBox(height: 5),

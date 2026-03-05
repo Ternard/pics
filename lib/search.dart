@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'new_meal.dart';
-import 'plate_provider.dart';
+import 'new_event.dart';
+import 'event_provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -299,7 +299,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'MealMeter',
+                    'Pics',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,

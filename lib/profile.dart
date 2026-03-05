@@ -22,7 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _currentIndex = 4;
 
   Future<void> _launchWebsite() async {
-    final Uri url = Uri.parse('https://www.mealmeter.com');
+    final Uri url = Uri.parse('https://www.pics.com');
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
@@ -135,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              "MealMeter",
+              "Pics",
               style: GoogleFonts.playfairDisplay(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

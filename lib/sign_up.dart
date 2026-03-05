@@ -128,7 +128,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      "MealMeter",
+                      "Pics",
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
