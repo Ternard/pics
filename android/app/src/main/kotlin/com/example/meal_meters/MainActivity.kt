@@ -1,4 +1,4 @@
-package com.example.meal_meters
+package com.example.pics
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -4,15 +4,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth_service.dart';
-import 'contact_us.dart';
-import 'home.dart';
-import 'login.dart';
-import 'events.dart';
-import 'event_provider.dart';
-import 'profile.dart';
-import 'event_gallery.dart';
-import 'search.dart';
-import 'sign_up.dart';
+import 'screens/home_screen.dart';
+import 'screens/close_friends_screen.dart';
+import 'screens/direct_share_screen.dart';
+import 'screens/activity_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/photo_viewer_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/signup_screen.dart';
+import 'screens/landing_screen.dart';
+import 'providers/friend_provider.dart';
+import 'providers/widget_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +31,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => PlateProvider()),
+        ChangeNotifierProvider(create: (context) => FriendProvider()),
+        ChangeNotifierProvider(create: (context) => WidgetProvider()),
       ],
       child: const PicsApp(),
     ),
@@ -42,66 +46,128 @@ class PicsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Pics - Close Friends Sharing',
       theme: ThemeData(
-        primarySwatch: Colors.brown,
+        primaryColor: const Color(0xFF64B5F6),
+        colorScheme: ColorScheme.light(
+          primary: const Color(0xFF64B5F6),
+          secondary: const Color(0xFF42A5F5),
+          surface: Colors.white,
+          background: const Color(0xFFF5F5F5),
+          error: Colors.red,
+        ),
         textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           elevation: 0,
-          backgroundColor: Colors.transparent,
-          iconTheme: const IconThemeData(color: Colors.brown),
-          titleTextStyle: GoogleFonts.poppins(
-            color: Colors.brown,
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF2C3E50),
+          titleTextStyle: TextStyle(
+            color: Color(0xFF2C3E50),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        cardTheme: CardTheme(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF64B5F6),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFFAFAFA),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: const Color(0xFF64B5F6).withOpacity(0.5), width: 1.5),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: const Color(0xFF64B5F6).withOpacity(0.3), width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: Color(0xFF64B5F6), width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+        cardTheme: const CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          margin: EdgeInsets.all(0),
         ),
       ),
-      home: FutureBuilder<bool>(
-        future: AuthService().isLoggedIn(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      initialRoute: '/',
+      routes: {
+        '/': (context) => FutureBuilder<bool>(
+          future: AuthService().isLoggedIn(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF64B5F6)),
+                  ),
+                ),
+              );
+            }
+            if (snapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Text('Error: ${snapshot.error}'),
+                ),
+              );
+            }
+            return snapshot.data == true
+                ? const HomeScreen()
+                : const LandingScreen();
+          },
+        ),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/close_friends': (context) => const CloseFriendsScreen(),
+        '/direct_share': (context) => DirectShareScreen(),
+        '/activity': (context) => const ActivityScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/settings': (context) => const SettingsScreen(),
+        '/photo_viewer': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          if (args == null || args is! Map<String, dynamic> || !args.containsKey('photoUrl')) {
             return const Scaffold(
               body: Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.brown),
+                child: Text(
+                  'No photo URL provided',
+                  style: TextStyle(color: Colors.red),
                 ),
               ),
             );
           }
-          if (snapshot.hasError) {
-            return Scaffold(
-                body: Center(
-                  child: Text(
-                      'Error checking login status: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.red)),
-                ));
-          }
-          return snapshot.data == true ? HomeScreen() : const SplashScreen();
+          return PhotoViewerScreen(
+            photoUrl: args['photoUrl'],
+            uploadedBy: args['uploadedBy'] ?? 'Unknown',
+            timestamp: args['timestamp'] ?? DateTime.now().toIso8601String(),
+          );
         },
-      ),
-      routes: {
-        '/meals': (context) => const MealScreen(),
-        '/signup': (context) => const SignUpScreen(),
-        '/login': (context) => const LoginPage(),
-        '/home': (context) =>  HomeScreen(),
-        '/profile': (context) => const ProfileScreen(),
-        '/restaurant': (context) => const RestaurantScreen(),
-        '/search': (context) => const SearchScreen(),
-        '/contact': (context) =>  ContactUsScreen(),
       },
       onGenerateRoute: (settings) {
+        // Handle any undefined routes
         return MaterialPageRoute(
           builder: (context) => Scaffold(
             appBar: AppBar(
               title: const Text('Page Not Found'),
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF64B5F6),
             ),
             body: Center(
               child: Column(
@@ -117,11 +183,13 @@ class PicsApp extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () => Navigator.pushNamed(context, '/home'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.brown,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
+                      backgroundColor: const Color(0xFF64B5F6),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
-                    child: const Text('Return Home'),
+                    child: const Text(
+                      'Return Home',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
@@ -129,103 +197,6 @@ class PicsApp extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _navigateToNextScreen();
-  }
-
-  Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-
-    final isLoggedIn = await AuthService().isLoggedIn();
-    Navigator.pushReplacementNamed(
-      context,
-      isLoggedIn ? '/home' : '/signup',
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5E1BE),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/logo.png',
-              width: 150,
-              height: 150,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.restaurant,
-                size: 100,
-                color: Colors.brown,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Pics',
-              style: GoogleFonts.poppins(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.brown,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Find meals within your budget',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.brown,
-              ),
-            ),
-            const SizedBox(height: 40),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.brown),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                final isLoggedIn = await AuthService().isLoggedIn();
-                Navigator.pushReplacementNamed(
-                  context,
-                  isLoggedIn ? '/home' : '/signup',
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.brown[700],
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: 5,
-              ),
-              child: const Text(
-                "Get Started",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

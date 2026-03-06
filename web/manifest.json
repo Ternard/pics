@@ -1,11 +1,11 @@
 {
-    "name": "meal_meters",
-    "short_name": "meal_meters",
+    "name": "Pics",
+    "short_name": "Pics",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#hexcode",
-    "theme_color": "#hexcode",
-    "description": "A new Flutter project.",
+    "background_color": "#F5E1BE",
+    "theme_color": "#8B4513",
+    "description": "Share moments together - Private event-based photo sharing",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
